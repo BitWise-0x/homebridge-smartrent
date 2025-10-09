@@ -367,22 +367,22 @@ export class ThermostatAccessory {
       thermostatAttributes,
       'mode'
     ) as ThermostatMode;
-    const cool_target_temp = findStateByName(
+    const cooling_setpoint = findStateByName(
       thermostatAttributes,
-      'cool_target_temp'
+      'cooling_setpoint'
     ) as number;
-    const heat_target_temp = findStateByName(
+    const heating_setpoint = findStateByName(
       thermostatAttributes,
-      'heat_target_temp'
+      'heating_setpoint'
     ) as number;
     switch (mode) {
       case 'off':
       case 'cool':
-        return this.toTemperatureCharacteristic(cool_target_temp);
+        return this.toTemperatureCharacteristic(cooling_setpoint);
       case 'heat':
       case 'auto':
       default:
-        return this.toTemperatureCharacteristic(heat_target_temp);
+        return this.toTemperatureCharacteristic(heating_setpoint);
     }
   }
 
@@ -393,10 +393,10 @@ export class ThermostatAccessory {
     switch (this.state.heating_cooling_state.current) {
       case this.platform.api.hap.Characteristic.TargetHeatingCoolingState.OFF:
       case this.platform.api.hap.Characteristic.TargetHeatingCoolingState.COOL:
-        return [{ name: 'cool_target_temp', state: target_temp }];
+        return [{ name: 'cooling_setpoint', state: target_temp }];
 
       case this.platform.api.hap.Characteristic.TargetHeatingCoolingState.HEAT:
-        return [{ name: 'heat_target_temp', state: target_temp }];
+        return [{ name: 'heating_setpoint', state: target_temp }];
 
       case this.platform.api.hap.Characteristic.TargetHeatingCoolingState.AUTO:
       default:
@@ -684,7 +684,7 @@ export class ThermostatAccessory {
     );
 
     const currentValue = this.toTemperatureCharacteristic(
-      findStateByName(thermostatAttributes, 'cool_target_temp') as number
+      findStateByName(thermostatAttributes, 'cooling_setpoint') as number
     );
     this.state.cooling_threshold_temperature.current = currentValue;
     return currentValue;
@@ -700,9 +700,9 @@ export class ThermostatAccessory {
     );
 
     this.state.cooling_threshold_temperature.target = value;
-    const cool_target_temp = this.fromTemperatureCharacteristic(value);
+    const cooling_setpoint = this.fromTemperatureCharacteristic(value);
     const newAttributes = [
-      { name: 'cool_target_temp', state: cool_target_temp },
+      { name: 'cooling_setpoint', state: cooling_setpoint },
     ];
     const thermostatAttributes =
       await this.platform.smartRentApi.setState<ThermostatData>(
@@ -711,9 +711,9 @@ export class ThermostatAccessory {
         newAttributes
       );
 
-    this.state.heating_threshold_temperature.current =
+    this.state.cooling_threshold_temperature.current =
       this.toTemperatureCharacteristic(
-        findStateByName(thermostatAttributes, 'cool_target_temp') as number
+        findStateByName(thermostatAttributes, 'cooling_setpoint') as number
       );
   }
 
@@ -729,7 +729,7 @@ export class ThermostatAccessory {
     );
 
     const currentValue = this.toTemperatureCharacteristic(
-      findStateByName(thermostatAttributes, 'heat_target_temp') as number
+      findStateByName(thermostatAttributes, 'heating_setpoint') as number
     );
     this.state.heating_threshold_temperature.current = currentValue;
     return currentValue;
@@ -745,9 +745,9 @@ export class ThermostatAccessory {
     );
 
     this.state.heating_threshold_temperature.target = value;
-    const heat_target_temp = this.fromTemperatureCharacteristic(value);
+    const heating_setpoint = this.fromTemperatureCharacteristic(value);
     const newAttributes = [
-      { name: 'heat_target_temp', state: heat_target_temp },
+      { name: 'heating_setpoint', state: heating_setpoint },
     ];
     const thermostatAttributes =
       await this.platform.smartRentApi.setState<ThermostatData>(
@@ -758,7 +758,7 @@ export class ThermostatAccessory {
 
     this.state.heating_threshold_temperature.current =
       this.toTemperatureCharacteristic(
-        findStateByName(thermostatAttributes, 'heat_target_temp') as number
+        findStateByName(thermostatAttributes, 'heating_setpoint') as number
       );
   }
 
