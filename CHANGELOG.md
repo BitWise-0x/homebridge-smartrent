@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.2](https://github.com/JackieTreeh0rn/homebridge-smartrent/compare/v1.1.1...v1.1.2) (2025-10-09)
+
+### Bug Fixes
+
+* **thermostat:** correct API attribute names for temperature setpoints ([02af840](https://github.com/JackieTreeh0rn/homebridge-smartrent/commit/02af8402ae52d34e8505e137f2c0d3201434b4b3))
+
 ## [1.1.1](https://github.com/JackieTreeh0rn/homebridge-smartrent/compare/v1.1.0...v1.1.1) (2025-09-09)
 
 ### Bug Fixes
