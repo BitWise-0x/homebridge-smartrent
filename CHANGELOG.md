@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.5](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.1.4...v1.1.5) (2025-12-15)
+
+### Bug Fixes
+
+* **schema:** use valid JSON Schema required syntax ([1583590](https://github.com/BitWise-0x/homebridge-smartrent/commit/158359037e14df22b70d1a057dff040e0cc384cf))
+
 ## [1.1.4](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.1.3...v1.1.4) (2025-12-15)
 
 ### Bug Fixes
