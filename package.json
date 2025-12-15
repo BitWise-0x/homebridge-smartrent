@@ -11,7 +11,7 @@
     "smartrent"
   ],
   "license": "GPL-3.0-or-later",
-  "author": "Røb",
+  "author": "Rob",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/BitWise-0x/homebridge-smartrent.git"
