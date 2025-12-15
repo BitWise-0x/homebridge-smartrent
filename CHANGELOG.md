@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.4](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.1.3...v1.1.4) (2025-12-15)
+
+### Bug Fixes
+
+* **engines:** add Node.js 24 support ([2f476bf](https://github.com/BitWise-0x/homebridge-smartrent/commit/2f476bf638451ea14050434e3c832c3009b68fcb))
+
 ## [1.1.3](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.1.2...v1.1.3) (2025-12-15)
 
 ### Bug Fixes
