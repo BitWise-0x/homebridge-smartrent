@@ -3,7 +3,7 @@ name: Bug Report
 about: Create a report to help us improve
 title: ''
 labels: bug
-assignees: 'JackieTreeh0rn'
+assignees: 'BitWise-0x'
 ---
 
 <!-- You must use the issue template below when submitting a bug -->

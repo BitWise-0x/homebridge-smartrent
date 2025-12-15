@@ -3,7 +3,7 @@
   "pluginType": "platform",
   "strictValidation": true,
   "headerDisplay": "Homebridge plugin for SmartRent installations",
-  "footerDisplay": "For documentation please see [GitHub](https://github.com/JackieTreeh0rn/homebridge-smartrent)",
+  "footerDisplay": "For documentation please see [GitHub](https://github.com/BitWise-0x/homebridge-smartrent)",
   "schema": {
     "type": "object",
     "properties": {

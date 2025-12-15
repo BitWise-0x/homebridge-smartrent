@@ -11,10 +11,10 @@
     "smartrent"
   ],
   "license": "GPL-3.0-or-later",
-  "author": "Jackie Treehorn",
+  "author": "Røb",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/JackieTreeh0rn/homebridge-smartrent.git"
+    "url": "git+https://github.com/BitWise-0x/homebridge-smartrent.git"
   },
   "type": "module",
   "publishConfig": {
@@ -90,11 +90,11 @@
   },
   "types": "./dist/index.d.ts",
   "bugs": {
-    "url": "https://github.com/JackieTreeh0rn/homebridge-smartrent/issues"
+    "url": "https://github.com/BitWise-0x/homebridge-smartrent/issues"
   },
-  "homepage": "https://github.com/JackieTreeh0rn/homebridge-smartrent#readme",
+  "homepage": "https://github.com/BitWise-0x/homebridge-smartrent#readme",
   "funding": {
     "type": "github",
-    "url": "https://github.com/sponsors/JackieTreeh0rn"
+    "url": "https://github.com/sponsors/BitWise-0x"
   }
 }
