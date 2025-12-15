@@ -3,7 +3,7 @@ name: Device Request
 about: Request support for a new SmartRent device
 title: 'New device: '
 labels: [enhancement, device request]
-assignees: JackieTreeh0rn
+assignees: BitWise-0x
 ---
 
 # Describe the device
