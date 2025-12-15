@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.6](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.1.5...v1.1.6) (2025-12-15)
+
+### Bug Fixes
+
+* **package:** use ASCII character in author field ([9dd44d6](https://github.com/BitWise-0x/homebridge-smartrent/commit/9dd44d637a8446146da115fb994be181bc592eb3))
+
 ## [1.1.5](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.1.4...v1.1.5) (2025-12-15)
 
 ### Bug Fixes
