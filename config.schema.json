@@ -15,18 +15,15 @@
       "email": {
         "title": "Email",
         "type": "string",
-        "format": "email",
-        "required": true
+        "format": "email"
       },
       "password": {
         "title": "Password",
-        "type": "string",
-        "required": true
+        "type": "string"
       },
       "tfaSecret": {
         "title": "Two-factor authentication code",
         "type": "string",
-        "required": false,
         "pattern": "^[A-Z0-9]{32}$",
         "minLength": 32,
         "maxLength": 32,
@@ -35,58 +32,51 @@
       "enableLeakSensors": {
         "title": "Enable leak sensors",
         "type": "boolean",
-        "required": false,
         "default": true,
         "description": "Uncheck to disable leak sensors."
       },
       "enableThermostats": {
         "title": "Enable thermostats",
         "type": "boolean",
-        "required": false,
         "default": true,
         "description": "Uncheck to disable thermostats."
       },
       "enableLocks": {
         "title": "Enable locks",
         "type": "boolean",
-        "required": false,
         "default": true,
         "description": "Uncheck to disable locks."
       },
       "enableSwitches": {
         "title": "Enable switches",
         "type": "boolean",
-        "required": false,
         "default": true,
         "description": "Uncheck to disable switches."
       },
       "enableSwitchMultiLevels": {
         "title": "Enable switch multi-levels",
         "type": "boolean",
-        "required": false,
         "default": true,
         "description": "Uncheck to disable switch multi-levels."
       },
       "unitName": {
         "title": "Unit name",
         "type": "string",
-        "required": false,
         "description": "Only necessary if you have multiple units in your SmartRent account. Get the name from the top of the More tab in the SmartRent app."
       },
       "enableAutoLock": {
         "title": "Enable auto locking after a delay from the last unlock",
         "type": "boolean",
-        "required": false,
         "default": false,
         "description": "Uncheck to disable auto lock."
       },
       "autoLockDelayInMinutes": {
         "title": "Auto lock delay in minutes",
         "type": "integer",
-        "required": false,
         "default": 5,
         "description": "The delay in minutes after the last unlock to automatically lock the door."
       }
-    }
+    },
+    "required": ["email", "password"]
   }
 }
