@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.7](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.1.6...v1.1.7) (2026-02-17)
+
+### Bug Fixes
+
+* **websocket:** prevent permanent device subscription loss after reconnect ([629a830](https://github.com/BitWise-0x/homebridge-smartrent/commit/629a8309762be8b5c0319e8492e5bb737a308436))
+
 ## [1.1.6](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.1.5...v1.1.6) (2025-12-15)
 
 ### Bug Fixes
