@@ -58,6 +58,7 @@ export class SmartRentApiClient {
     const apiClient = axios.create({
       baseURL: API_URL,
       headers: API_CLIENT_HEADERS,
+      timeout: 10000,
     });
     apiClient.interceptors.request.use(this._handleRequest.bind(this));
     apiClient.interceptors.response.use(this._handleResponse.bind(this));
@@ -156,6 +157,8 @@ export class SmartRentWebsocketClient extends SmartRentApiClient {
   public wsClient: Promise<WebSocket | undefined>;
   public event: object;
   private readonly devices: number[];
+  private _reconnecting = false;
+  private _subscribeRetries: Record<number, number> = {};
 
   constructor(readonly platform: SmartRentPlatform) {
     super(platform);
@@ -221,38 +224,46 @@ export class SmartRentWebsocketClient extends SmartRentApiClient {
 
   private _handleWsOpen() {
     this.log.debug('WebSocket connection opened');
+    this._subscribeRetries = {};
     this.devices.forEach(device => this.subscribeDevice(device));
   }
 
   private _handleWsMessage(message: WebSocket.MessageEvent) {
-    this.log.debug(`WebSocket message received: Data: ${message.data}`);
-    const data: WSPayload = JSON.parse(String(message.data));
-    if (data[3].includes('attribute_state')) {
-      const device = data[2].split(':')[1];
-      this.log.debug(String(data[4]));
-      this.event[device](data[4]);
+    try {
+      this.log.debug(`WebSocket message received: Data: ${message.data}`);
+      const data: WSPayload = JSON.parse(String(message.data));
+      if (data[3]?.includes('attribute_state')) {
+        const device = data[2]?.split(':')[1];
+        if (device && typeof this.event[device] === 'function') {
+          this.log.debug(String(data[4]));
+          this.event[device](data[4]);
+        }
+      }
+    } catch (error) {
+      this.log.error('Failed to process WebSocket message:', error);
     }
+  }
+
+  private _scheduleReconnect() {
+    if (this._reconnecting) return;
+    this._reconnecting = true;
+    setTimeout(() => {
+      this._reconnecting = false;
+      this.wsClient = this._initializeWsClient();
+    }, 5000);
   }
 
   private _handleWsError(error: WebSocket.ErrorEvent) {
     this.log.error(`WebSocket error: ${error.message}`);
-    this.wsClient
-      .then(client => {
-        if (client) {
-          client.close();
-        }
-      })
-      .then(() => {
-        this.wsClient = this._initializeWsClient();
-      });
+    this.wsClient.then(client => client?.close());
+    this._scheduleReconnect();
   }
 
   private _handleWsClose(event: WebSocket.CloseEvent) {
     this.log.debug(
-      `WebSocket connection closed: Code: ${event.code}, Reason: ${event.reason}, Event: ${event}`,
-      event
+      `WebSocket connection closed: Code: ${event.code}, Reason: ${event.reason}`
     );
-    this.wsClient = this._initializeWsClient();
+    this._scheduleReconnect();
   }
 
   /**
@@ -285,11 +296,24 @@ export class SmartRentWebsocketClient extends SmartRentApiClient {
           {},
         ])
       );
+      this._subscribeRetries[deviceId] = 0;
       this.log.debug(`Subscribed to device: ${deviceId}`);
     } catch (err) {
+      const attempt = (this._subscribeRetries[deviceId] ?? 0) + 1;
+      this._subscribeRetries[deviceId] = attempt;
+      const MAX_RETRIES = 5;
+      if (attempt > MAX_RETRIES) {
+        this.log.error(
+          `Gave up subscribing to device ${deviceId} after ${MAX_RETRIES} attempts.`
+        );
+        return;
+      }
+      const delay = Math.min(1000 * Math.pow(2, attempt - 1), 30000);
       this.log.error(String(err));
-      this.log.error(`Dang didnt subscribe ${deviceId}, trying again`);
-      setTimeout(() => this.subscribeDevice(deviceId), 1000);
+      this.log.error(
+        `Dang didnt subscribe ${deviceId}, trying again in ${delay}ms (attempt ${attempt}/${MAX_RETRIES})`
+      );
+      setTimeout(() => this.subscribeDevice(deviceId), delay);
     }
   }
 }

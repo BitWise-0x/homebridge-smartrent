@@ -13,6 +13,7 @@ import { findStateByName } from '../lib/utils.js';
 export class ThermostatAccessory {
   private readonly thermostatService: Service;
   private readonly fanService: Service;
+  private _stateCache: Promise<DeviceAttribute[]> | null = null;
 
   private readonly state: {
     hubId: string;
@@ -458,22 +459,40 @@ export class ThermostatAccessory {
     }
   }
 
+  private _getState(): Promise<DeviceAttribute[]> {
+    if (!this._stateCache) {
+      this._stateCache = this.platform.smartRentApi.getState(
+        this.state.hubId,
+        this.state.deviceId
+      );
+      this._stateCache.finally(() => {
+        setTimeout(() => {
+          this._stateCache = null;
+        }, 500);
+      });
+    }
+    return this._stateCache;
+  }
+
   /**
    * Handle requests to get the current value of the "Current Heating Cooling State" characteristic
    */
   async handleCurrentHeatingCoolingStateGet() {
     this.platform.log.debug('Triggered GET CurrentHeatingCoolingState');
-
-    const thermostatAttributes = await this.platform.smartRentApi.getState(
-      this.state.hubId,
-      this.state.deviceId
-    );
-
-    const currentValue = this.toCurrentHeatingCoolingStateCharacteristic(
-      findStateByName(thermostatAttributes, 'mode') as ThermostatMode
-    );
-    this.state.heating_cooling_state.current = currentValue;
-    return currentValue;
+    try {
+      const thermostatAttributes = await this._getState();
+      const currentValue = this.toCurrentHeatingCoolingStateCharacteristic(
+        findStateByName(thermostatAttributes, 'mode') as ThermostatMode
+      );
+      this.state.heating_cooling_state.current = currentValue;
+      return currentValue;
+    } catch (error) {
+      this.platform.log.error(
+        'Failed to get CurrentHeatingCoolingState:',
+        error
+      );
+      return this.state.heating_cooling_state.current;
+    }
   }
 
   /**
@@ -481,17 +500,20 @@ export class ThermostatAccessory {
    */
   async handleTargetHeatingCoolingStateGet() {
     this.platform.log.debug('Triggered GET TargetHeatingCoolingState');
-
-    const thermostatAttributes = await this.platform.smartRentApi.getState(
-      this.state.hubId,
-      this.state.deviceId
-    );
-
-    const currentValue = this.toTargetHeatingCoolingStateCharacteristic(
-      findStateByName(thermostatAttributes, 'mode') as ThermostatMode
-    );
-    this.state.heating_cooling_state.current = currentValue;
-    return currentValue;
+    try {
+      const thermostatAttributes = await this._getState();
+      const currentValue = this.toTargetHeatingCoolingStateCharacteristic(
+        findStateByName(thermostatAttributes, 'mode') as ThermostatMode
+      );
+      this.state.heating_cooling_state.target = currentValue;
+      return currentValue;
+    } catch (error) {
+      this.platform.log.error(
+        'Failed to get TargetHeatingCoolingState:',
+        error
+      );
+      return this.state.heating_cooling_state.target;
+    }
   }
 
   /**
@@ -517,22 +539,21 @@ export class ThermostatAccessory {
   /**
    * Handle requests to get the current value of the "Current Temperature" characteristic
    */
-  // --- Use destructuring for GET handlers ---
-  // --- Use destructuring for GET handlers ---
   async handleCurrentTemperatureGet() {
     this.platform.log.debug('Triggered GET CurrentTemperature');
-    const thermostatAttributes = await this.platform.smartRentApi.getState(
-      this.state.hubId,
-      this.state.deviceId
-    );
-    // Assuming thermostatAttributes is an array of DeviceAttribute
-    const current_temp = findStateByName(
-      thermostatAttributes,
-      'current_temp'
-    ) as number;
-    const currentValue = this.toTemperatureCharacteristic(current_temp);
-    this.state.current_temperature.current = currentValue;
-    return currentValue;
+    try {
+      const thermostatAttributes = await this._getState();
+      const current_temp = findStateByName(
+        thermostatAttributes,
+        'current_temp'
+      ) as number;
+      const currentValue = this.toTemperatureCharacteristic(current_temp);
+      this.state.current_temperature.current = currentValue;
+      return currentValue;
+    } catch (error) {
+      this.platform.log.error('Failed to get CurrentTemperature:', error);
+      return this.state.current_temperature.current;
+    }
   }
 
   // ...repeat similar improvements for other handlers...
@@ -547,16 +568,16 @@ export class ThermostatAccessory {
    */
   async handleTargetTemperatureGet() {
     this.platform.log.debug('Triggered GET TargetTemperature');
-
-    const thermostatAttributes = await this.platform.smartRentApi.getState(
-      this.state.hubId,
-      this.state.deviceId
-    );
-
-    const currentValue =
-      this.toTargetTemperatureCharacteristic(thermostatAttributes);
-    this.state.target_temperature.current = currentValue;
-    return currentValue;
+    try {
+      const thermostatAttributes = await this._getState();
+      const currentValue =
+        this.toTargetTemperatureCharacteristic(thermostatAttributes);
+      this.state.target_temperature.current = currentValue;
+      return currentValue;
+    } catch (error) {
+      this.platform.log.error('Failed to get TargetTemperature:', error);
+      return this.state.target_temperature.current;
+    }
   }
 
   /**
@@ -658,18 +679,18 @@ export class ThermostatAccessory {
    */
   async handleCurrentRelativeHumidityGet() {
     this.platform.log.debug('Triggered GET CurrentRelativeHumidity');
-
-    const thermostatAttributes = await this.platform.smartRentApi.getState(
-      this.state.hubId,
-      this.state.deviceId
-    );
-
-    const currentValue = findStateByName(
-      thermostatAttributes,
-      'current_humidity'
-    ) as number;
-    this.state.current_relative_humidity.current = currentValue;
-    return currentValue;
+    try {
+      const thermostatAttributes = await this._getState();
+      const currentValue = findStateByName(
+        thermostatAttributes,
+        'current_humidity'
+      ) as number;
+      this.state.current_relative_humidity.current = currentValue;
+      return currentValue;
+    } catch (error) {
+      this.platform.log.error('Failed to get CurrentRelativeHumidity:', error);
+      return this.state.current_relative_humidity.current;
+    }
   }
 
   /**
@@ -677,17 +698,20 @@ export class ThermostatAccessory {
    */
   async handleCoolingThresholdTemperatureGet() {
     this.platform.log.debug('Triggered GET CoolingThresholdTemperature');
-
-    const thermostatAttributes = await this.platform.smartRentApi.getState(
-      this.state.hubId,
-      this.state.deviceId
-    );
-
-    const currentValue = this.toTemperatureCharacteristic(
-      findStateByName(thermostatAttributes, 'cooling_setpoint') as number
-    );
-    this.state.cooling_threshold_temperature.current = currentValue;
-    return currentValue;
+    try {
+      const thermostatAttributes = await this._getState();
+      const currentValue = this.toTemperatureCharacteristic(
+        findStateByName(thermostatAttributes, 'cooling_setpoint') as number
+      );
+      this.state.cooling_threshold_temperature.current = currentValue;
+      return currentValue;
+    } catch (error) {
+      this.platform.log.error(
+        'Failed to get CoolingThresholdTemperature:',
+        error
+      );
+      return this.state.cooling_threshold_temperature.current;
+    }
   }
 
   /**
@@ -722,17 +746,20 @@ export class ThermostatAccessory {
    */
   async handleHeatingThresholdTemperatureGet() {
     this.platform.log.debug('Triggered GET HeatingThresholdTemperature');
-
-    const thermostatAttributes = await this.platform.smartRentApi.getState(
-      this.state.hubId,
-      this.state.deviceId
-    );
-
-    const currentValue = this.toTemperatureCharacteristic(
-      findStateByName(thermostatAttributes, 'heating_setpoint') as number
-    );
-    this.state.heating_threshold_temperature.current = currentValue;
-    return currentValue;
+    try {
+      const thermostatAttributes = await this._getState();
+      const currentValue = this.toTemperatureCharacteristic(
+        findStateByName(thermostatAttributes, 'heating_setpoint') as number
+      );
+      this.state.heating_threshold_temperature.current = currentValue;
+      return currentValue;
+    } catch (error) {
+      this.platform.log.error(
+        'Failed to get HeatingThresholdTemperature:',
+        error
+      );
+      return this.state.heating_threshold_temperature.current;
+    }
   }
 
   /**
@@ -767,17 +794,17 @@ export class ThermostatAccessory {
    */
   async handleOnGet() {
     this.platform.log.debug('Triggered GET On');
-
-    const thermostatAttributes = await this.platform.smartRentApi.getState(
-      this.state.hubId,
-      this.state.deviceId
-    );
-
-    const currentValue = this.toFanOnCharacteristic(
-      findStateByName(thermostatAttributes, 'fan_mode') as ThermostatFanMode
-    );
-    this.state.fan_on.current = currentValue;
-    return currentValue;
+    try {
+      const thermostatAttributes = await this._getState();
+      const currentValue = this.toFanOnCharacteristic(
+        findStateByName(thermostatAttributes, 'fan_mode') as ThermostatFanMode
+      );
+      this.state.fan_on.current = currentValue;
+      return currentValue;
+    } catch (error) {
+      this.platform.log.error('Failed to get On (fan mode):', error);
+      return this.state.fan_on.current;
+    }
   }
 
   /**

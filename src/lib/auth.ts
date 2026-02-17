@@ -108,6 +108,7 @@ export class SmartRentAuthClient {
       baseURL: BASE_URL,
       method: 'POST',
       headers: AUTH_CLIENT_HEADERS,
+      timeout: 10000,
     });
     authClient.interceptors.response.use(this._handleResponse.bind(this));
     authClient.interceptors.request.use(this._handleRequest.bind(this));
