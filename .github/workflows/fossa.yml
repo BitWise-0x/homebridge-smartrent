@@ -5,6 +5,7 @@ on: [push, pull_request]
 jobs:
   fossa-scan:
     runs-on: ubuntu-latest
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     steps:
       - uses: actions/checkout@v4
       - uses: fossas/fossa-action@v1.4.0
