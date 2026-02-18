@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.10](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.1.9...v1.1.10) (2026-02-18)
+
+### Bug Fixes
+
+* **ws:** wait for WebSocket connection before subscribing devices ([580c7c2](https://github.com/BitWise-0x/homebridge-smartrent/commit/580c7c2aabc38df412f66bd9c96876a53c80fbeb))
+
 ## [1.1.9](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.1.8...v1.1.9) (2026-02-18)
 
 ### Bug Fixes
