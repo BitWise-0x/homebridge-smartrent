@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.8](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.1.7...v1.1.8) (2026-02-18)
+
+### Bug Fixes
+
+* **ci:** require dependency-group for grouped PR auto-merge ([e5d2fa3](https://github.com/BitWise-0x/homebridge-smartrent/commit/e5d2fa3cfdde9e36aeb9e42c7830c99eb38cf545))
+
 ## [1.1.7](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.1.6...v1.1.7) (2026-02-17)
 
 ### Bug Fixes
