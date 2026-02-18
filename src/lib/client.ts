@@ -198,7 +198,7 @@ export class SmartRentWebsocketClient extends SmartRentApiClient {
    * Initialize WebSocket client for SmartRent API
    * @returns WebSocket client
    */
-  private async _initializeWsClient() {
+  private async _initializeWsClient(): Promise<WebSocket | undefined> {
     this.log.debug('WebSocket connection opening');
     const token = await this.getAccessToken();
     if (!token || token === 'undefined') {
@@ -215,11 +215,26 @@ export class SmartRentWebsocketClient extends SmartRentApiClient {
           vsn: WS_VERSION,
         }).toString()
     );
-    wsClient.onopen = this._handleWsOpen.bind(this);
-    wsClient.onmessage = this._handleWsMessage.bind(this);
-    wsClient.onerror = this._handleWsError.bind(this);
-    wsClient.onclose = this._handleWsClose.bind(this);
-    return wsClient;
+
+    return new Promise<WebSocket>((resolve, reject) => {
+      const connectionTimeout = setTimeout(() => {
+        wsClient.close();
+        reject(new Error('WebSocket connection timed out'));
+      }, 30000);
+
+      wsClient.onopen = () => {
+        clearTimeout(connectionTimeout);
+        this._handleWsOpen();
+        resolve(wsClient);
+      };
+      wsClient.onmessage = this._handleWsMessage.bind(this);
+      wsClient.onerror = (error: WebSocket.ErrorEvent) => {
+        clearTimeout(connectionTimeout);
+        this._handleWsError(error);
+        reject(new Error(`WebSocket connection failed: ${error.message}`));
+      };
+      wsClient.onclose = this._handleWsClose.bind(this);
+    });
   }
 
   private _handleWsOpen() {
@@ -303,15 +318,15 @@ export class SmartRentWebsocketClient extends SmartRentApiClient {
       this._subscribeRetries[deviceId] = attempt;
       const MAX_RETRIES = 5;
       if (attempt > MAX_RETRIES) {
-        this.log.error(
+        this.log.warn(
           `Gave up subscribing to device ${deviceId} after ${MAX_RETRIES} attempts.`
         );
         return;
       }
       const delay = Math.min(1000 * Math.pow(2, attempt - 1), 30000);
-      this.log.error(String(err));
-      this.log.error(
-        `Dang didnt subscribe ${deviceId}, trying again in ${delay}ms (attempt ${attempt}/${MAX_RETRIES})`
+      this.log.warn(String(err));
+      this.log.warn(
+        `Failed to subscribe device ${deviceId}, retrying in ${delay}ms (attempt ${attempt}/${MAX_RETRIES})`
       );
       setTimeout(() => this.subscribeDevice(deviceId), delay);
     }
