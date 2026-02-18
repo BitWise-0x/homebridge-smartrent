@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.9](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.1.8...v1.1.9) (2026-02-18)
+
+### Bug Fixes
+
+* **release:** correct semantic-release branches config key ([ffaa2f3](https://github.com/BitWise-0x/homebridge-smartrent/commit/ffaa2f3ea18c93f64613ef04f863a4b9ba961203))
+
 ## [1.1.8](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.1.7...v1.1.8) (2026-02-18)
 
 ### Bug Fixes
