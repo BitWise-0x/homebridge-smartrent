@@ -375,18 +375,28 @@ export class SmartRentAuthClient {
   }
 
   private async _getWebsocketToken(session: Session) {
-    const response = await this.client.post<{ token: string }>(
-      WEBSOCKET_TOKEN_PATH,
-      undefined,
-      {
-        headers: {
-          ...AUTH_CLIENT_HEADERS,
-          Authorization: `Bearer ${session.accessToken}`,
-        },
+    try {
+      const response = await this.client.post<{ token: string }>(
+        WEBSOCKET_TOKEN_PATH,
+        undefined,
+        {
+          headers: {
+            ...AUTH_CLIENT_HEADERS,
+            Authorization: `Bearer ${session.accessToken}`,
+          },
+        }
+      );
+      const token = response.data?.token;
+      if (!token) {
+        this.log.warn('WebSocket token endpoint returned 200 but no token');
+        return;
       }
-    );
-    await this._storeWebSocketToken(response.data.token);
-    return response.data.token;
+      await this._storeWebSocketToken(token);
+      return token;
+    } catch (error) {
+      this.log.warn('Failed to fetch WebSocket token:', error);
+      return;
+    }
   }
 
   /**
@@ -468,9 +478,9 @@ export class SmartRentAuthClient {
     ) {
       return session.webSocketToken;
     }
-    await this._getWebsocketToken(session);
-    if (session && 'webSocketToken' in session) {
-      return session.webSocketToken;
+    const token = await this._getWebsocketToken(session);
+    if (token) {
+      return token;
     }
     this.log.error('Failed to authenticate with SmartRent');
   }
