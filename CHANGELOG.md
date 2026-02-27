@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.0](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.1.10...v1.2.0) (2026-02-27)
+
+### Features
+
+* MAJOR ENHANCEMENTS — 7 new features, 14 bug fixes ([6183a44](https://github.com/BitWise-0x/homebridge-smartrent/commit/6183a4405bdc9792665643704b32100fd79e8613))
+
 ## [1.1.10](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.1.9...v1.1.10) (2026-02-18)
 
 ### Bug Fixes
