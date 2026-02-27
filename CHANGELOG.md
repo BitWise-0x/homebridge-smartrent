@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.3.0](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.2.0...v1.3.0) (2026-02-27)
+
+### Features
+
+* add 5 user-configurable options to plugin settings ([669883d](https://github.com/BitWise-0x/homebridge-smartrent/commit/669883d3d1615aaf3b405cf3a1c17d994db8fe48))
+
 ## [1.2.0](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.1.10...v1.2.0) (2026-02-27)
 
 ### Features
