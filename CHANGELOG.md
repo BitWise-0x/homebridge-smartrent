@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.3.3](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.3.2...v1.3.3) (2026-02-27)
+
+### Bug Fixes
+
+* use direct return value from WebSocket token fetch ([ff7fee0](https://github.com/BitWise-0x/homebridge-smartrent/commit/ff7fee05890f6861d411d7a52e5201ec1097a3e6))
+
 ## [1.3.2](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.3.1...v1.3.2) (2026-02-27)
 
 ### Bug Fixes
