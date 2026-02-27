@@ -16,9 +16,10 @@
 [![GitHub pull requests](https://img.shields.io/github/issues-pr/BitWise-0x/homebridge-smartrent.svg)](https://github.com/BitWise-0x/homebridge-smartrent/pulls)
 [![GitHub issues](https://img.shields.io/github/issues/BitWise-0x/homebridge-smartrent.svg)](https://github.com/BitWise-0x/homebridge-smartrent/issues)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FBitWise-0x%2Fhomebridge-smartrent.svg?type=shield&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2FBitWise-0x%2Fhomebridge-smartrent?ref=badge_shield&issueType=license)
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FBitWise-0x%2Fhomebridge-smartrent.svg?type=shield&issueType=security)](https://app.fossa.com/projects/git%2Bgithub.com%2FBitWise-0x%2Fhomebridge-smartrent?ref=badge_shield&issueType=security)
 
-The most comprehensive [SmartRent](https://smartrent.com) HomeKit integration available, [Homebridge](https://homebridge.io) Verified. Control your SmartRent devices with [Apple Home](https://www.apple.com/ios/home/): supporting 6 device types w/ real-time updates, battery monitoring, and advanced status reporting.
+<!-- [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FBitWise-0x%2Fhomebridge-smartrent.svg?type=shield&issueType=security)](https://app.fossa.com/projects/git%2Bgithub.com%2FBitWise-0x%2Fhomebridge-smartrent?ref=badge_shield&issueType=security) -->
+
+The most comprehensive [SmartRent](https://smartrent.com) Homebridge integration to date, [Homebridge](https://homebridge.io) Verified. Control your SmartRent devices with [Apple Home](https://www.apple.com/ios/home/): supporting 6 device types w/ real-time updates, battery monitoring, and advanced status reporting.
 
 </span>
 
