@@ -130,7 +130,8 @@ export class LockAccessory {
     try {
       const lockData = await this._getBatteryData();
       const batteryLevel = Math.round(Number(lockData.battery_level));
-      return batteryLevel <= 20
+      const threshold = this.platform.config.lowBatteryThreshold ?? 20;
+      return batteryLevel <= threshold
         ? this.platform.api.hap.Characteristic.StatusLowBattery
             .BATTERY_LEVEL_LOW
         : this.platform.api.hap.Characteristic.StatusLowBattery
@@ -324,7 +325,7 @@ export class LockAccessory {
    * Refresh the current state of the lock using the SmartRent API HTTP request in intervals
    */
   async updateStateTask() {
-    const INTERVAL = 10000;
+    const INTERVAL = (this.platform.config.lockPollingInterval ?? 10) * 1000;
     this.platform.log.debug(
       'Beginning updateStateTask',
       this.state.locked.current

@@ -14,4 +14,9 @@ export interface SmartRentPlatformConfig extends PlatformConfig {
   enableSwitchMultiLevels?: boolean;
   enableAutoLock?: boolean;
   autoLockDelayInMinutes?: number;
+  excludeDevices?: number[];
+  lowBatteryThreshold?: number;
+  lockPollingInterval?: number;
+  temperatureUnit?: 'fahrenheit' | 'celsius';
+  verboseLogging?: boolean;
 }

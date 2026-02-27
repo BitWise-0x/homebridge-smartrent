@@ -147,7 +147,8 @@ export class LeakSensorAccessory {
     try {
       const data = await this._getBatteryData();
       const batteryLevel = Math.round(Number(data.battery_level));
-      return batteryLevel <= 20
+      const threshold = this.platform.config.lowBatteryThreshold ?? 20;
+      return batteryLevel <= threshold
         ? this.platform.api.hap.Characteristic.StatusLowBattery
             .BATTERY_LEVEL_LOW
         : this.platform.api.hap.Characteristic.StatusLowBattery

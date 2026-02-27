@@ -34,6 +34,11 @@ export class SmartRentPlatform implements DynamicPlatformPlugin {
     public readonly config: SmartRentPlatformConfig,
     public readonly api: API
   ) {
+    if (this.config.verboseLogging) {
+      log.debug = log.info.bind(log);
+      log.info('Verbose logging enabled');
+    }
+
     log.debug(`Initializing ${this.config.platform} platform`);
     this.smartRentApi = new SmartRentApi(this);
     log.debug('Finished initializing platform:', this.config.platform);
@@ -151,7 +156,15 @@ export class SmartRentPlatform implements DynamicPlatformPlugin {
    * must not be registered again to prevent "duplicate UUID" errors.
    */
   async discoverDevices() {
-    const devices = await this.smartRentApi.discoverDevices();
+    const allDevices = await this.smartRentApi.discoverDevices();
+    const excludeIds = new Set(this.config.excludeDevices ?? []);
+    const devices = allDevices.filter(device => {
+      if (excludeIds.has(device.id)) {
+        this.log.info(`Excluding device: ${device.name} (${device.id})`);
+        return false;
+      }
+      return true;
+    });
 
     // loop over the discovered devices and register each one if it has not already been registered
     const uuids = devices.map(device => {

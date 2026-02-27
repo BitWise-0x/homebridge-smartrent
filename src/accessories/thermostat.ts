@@ -72,11 +72,17 @@ export class ThermostatAccessory {
       },
       temperature_display_units: {
         current:
-          this.platform.api.hap.Characteristic.TemperatureDisplayUnits
-            .FAHRENHEIT,
+          this.platform.config.temperatureUnit === 'celsius'
+            ? this.platform.api.hap.Characteristic.TemperatureDisplayUnits
+                .CELSIUS
+            : this.platform.api.hap.Characteristic.TemperatureDisplayUnits
+                .FAHRENHEIT,
         target:
-          this.platform.api.hap.Characteristic.TemperatureDisplayUnits
-            .FAHRENHEIT,
+          this.platform.config.temperatureUnit === 'celsius'
+            ? this.platform.api.hap.Characteristic.TemperatureDisplayUnits
+                .CELSIUS
+            : this.platform.api.hap.Characteristic.TemperatureDisplayUnits
+                .FAHRENHEIT,
       },
       current_relative_humidity: {
         current: 0,
@@ -684,9 +690,7 @@ export class ThermostatAccessory {
   async handleTemperatureDisplayUnitsGet() {
     this.platform.log.debug('Triggered GET TemperatureDisplayUnits');
 
-    // set this to a valid value for TemperatureDisplayUnits
-    return this.platform.api.hap.Characteristic.TemperatureDisplayUnits
-      .FAHRENHEIT;
+    return this.state.temperature_display_units.current;
   }
 
   /**

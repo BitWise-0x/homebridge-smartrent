@@ -83,6 +83,46 @@
         "minimum": 1,
         "maximum": 1440,
         "description": "The delay in minutes after the last unlock to automatically lock the door."
+      },
+      "excludeDevices": {
+        "title": "Exclude devices",
+        "type": "array",
+        "items": {
+          "type": "integer"
+        },
+        "description": "List of SmartRent device IDs to exclude from HomeKit. Device IDs are shown in the Homebridge logs at startup."
+      },
+      "lowBatteryThreshold": {
+        "title": "Low battery threshold (%)",
+        "type": "integer",
+        "default": 20,
+        "minimum": 5,
+        "maximum": 50,
+        "description": "Battery percentage at or below which devices report low battery status."
+      },
+      "lockPollingInterval": {
+        "title": "Lock polling interval (seconds)",
+        "type": "integer",
+        "default": 10,
+        "minimum": 5,
+        "maximum": 300,
+        "description": "How often to poll the lock state via the SmartRent API, in seconds."
+      },
+      "temperatureUnit": {
+        "title": "Temperature display unit",
+        "type": "string",
+        "default": "fahrenheit",
+        "oneOf": [
+          { "title": "Fahrenheit", "enum": ["fahrenheit"] },
+          { "title": "Celsius", "enum": ["celsius"] }
+        ],
+        "description": "Temperature display unit for thermostats in the Home app."
+      },
+      "verboseLogging": {
+        "title": "Verbose logging",
+        "type": "boolean",
+        "default": false,
+        "description": "Enable verbose debug logging for troubleshooting. Logs detailed WebSocket, API, and device state information."
       }
     },
     "required": ["email", "password"]
