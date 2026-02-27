@@ -22,7 +22,9 @@ Verified [Homebridge](https://homebridge.io) plugin for [SmartRent](https://smar
 
 </span>
 
-## 🔄 Supported Devices
+<br>
+
+## Supported Devices
 
 Homebridge SmartRent currently supports these devices through a SmartRent hub:
 
@@ -32,7 +34,9 @@ Homebridge SmartRent currently supports these devices through a SmartRent hub:
 - 🌡 Thermostats
 - 🎚 Multilevel | Dimmer Switches
 
-## ✅ Usage
+![Homebridge dashboard](homebridge-ui/public/screenshot2.png)
+
+<br>
 
 ## Installation
 
@@ -64,7 +68,7 @@ Homebridge SmartRent currently supports these devices through a SmartRent hub:
    homebridge -D
    ```
 
-![Homebridge dashboard](homebridge-ui/public/screenshot2.png)
+<br>
 
 ## Configuration
 
@@ -77,7 +81,9 @@ All configuration values are strings.
 | `tfaSecret` | If you have enabled two-factor authentication on your SmartRent account, enter the secret used to seed the 2FA token                 |
 | `unitName`  | Only necessary if you have multiple units in your SmartRent account. Get the name from the top of the More tab in the SmartRent app. |
 
-## 🛠 Development
+<br>
+
+## Development
 
 ### Prerequisites
 
@@ -113,19 +119,27 @@ npm run format      # auto-fix formatting
 
 Commits must follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/#summary) — enforced by pre-commit hooks via [commitlint](https://commitlint.js.org/) and [husky](https://typicode.github.io/husky/).
 
+<br>
+
 ## Troubleshooting
 
 If you run into issues, check the [Homebridge troubleshooting wiki](https://github.com/homebridge/homebridge/wiki/Basic-Troubleshooting) first. If the problem persists, [open an issue](https://github.com/BitWise-0x/homebridge-smartrent/issues/new/choose) with as much detail as possible.
 
+<br>
+
 ## Contributing
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines on bug reports, feature requests, and code contributions.
+
+<br>
 
 ## License
 
 [GNU GENERAL PUBLIC LICENSE, Version 3](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
 <!-- [![FOSSA Status](https://app.fossa.com/api/projects/custom%2B56237%2Fgithub.com%2FBitWise-0x%2Fhomebridge-smartrent.svg?type=large&issueType=license)](https://app.fossa.com/projects/custom%2B56237%2Fgithub.com%2FBitWise-0x%2Fhomebridge-smartrent?ref=badge_large&issueType=license) -->
+
+<br>
 
 ## Disclaimer
 
