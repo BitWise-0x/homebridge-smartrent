@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.3.2](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.3.1...v1.3.2) (2026-02-27)
+
+### Bug Fixes
+
+* persist cleared WebSocket token to disk to prevent stale 403 loop ([47be06a](https://github.com/BitWise-0x/homebridge-smartrent/commit/47be06a89cad02b4851cd916c5cab78c7f321861))
+
 ## [1.3.1](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.3.0...v1.3.1) (2026-02-27)
 
 ### Bug Fixes
