@@ -18,7 +18,7 @@
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FBitWise-0x%2Fhomebridge-smartrent.svg?type=shield&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2FBitWise-0x%2Fhomebridge-smartrent?ref=badge_shield&issueType=license)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FBitWise-0x%2Fhomebridge-smartrent.svg?type=shield&issueType=security)](https://app.fossa.com/projects/git%2Bgithub.com%2FBitWise-0x%2Fhomebridge-smartrent?ref=badge_shield&issueType=security)
 
-Verified [Homebridge](https://homebridge.io) plugin for [SmartRent](https://smartrent.com), allowing you to control your SmartRent devices with [Apple Home](https://www.apple.com/ios/home/).
+The most comprehensive [SmartRent](https://smartrent.com) HomeKit integration available, [Homebridge](https://homebridge.io) Verified. Control your SmartRent devices with [Apple Home](https://www.apple.com/ios/home/): supporting 6 device types w/ real-time updates, battery monitoring, and advanced status reporting.
 
 </span>
 
@@ -26,15 +26,32 @@ Verified [Homebridge](https://homebridge.io) plugin for [SmartRent](https://smar
 
 ## Supported Devices
 
-Homebridge SmartRent currently supports these devices through a SmartRent hub:
+| Device            | HomeKit Service         | Capabilities                                                                                                                                     |
+| ----------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 🔒 Locks          | LockMechanism + Battery | <ul><li>Lock/unlock</li><li>Battery level</li><li>Low battery alerts</li><li>Jam detection</li><li>Auto-lock timer</li></ul>                     |
+| 🌡️ Thermostats    | Thermostat + Fan        | <ul><li>Mode control (heat/cool/auto/aux heat)</li><li>Temperature</li><li>Humidity</li><li>Fan mode</li><li>Real-time operating state</li></ul> |
+| 💧 Leak Sensors   | LeakSensor + Battery    | <ul><li>Leak detection</li><li>Battery level</li><li>Low battery alerts</li></ul>                                                                |
+| 🔍 Motion Sensors | MotionSensor            | <ul><li>Motion detection</li><li>Real-time updates</li></ul>                                                                                     |
+| 🔌 Switches       | Switch                  | <ul><li>On/off control</li></ul>                                                                                                                 |
+| 💡 Dimmers        | Lightbulb               | <ul><li>On/off control</li><li>Brightness control</li></ul>                                                                                      |
 
-- 🔒 Locks
-- 💧 Leak sensors
-- 🔌 Switches
-- 🌡 Thermostats
-- 🎚 Multilevel | Dimmer Switches
+All devices report online/offline status via the StatusActive characteristic.
 
 ![Homebridge dashboard](homebridge-ui/public/screenshot2.png)
+
+<br>
+
+## Features
+
+- **Real-time updates** — WebSocket connection with Phoenix heartbeat for instant state changes across all devices
+- **6 device types** — Locks, thermostats, leak sensors, motion sensors, switches, and dimmers
+- **Accurate HVAC status** — Uses the thermostat's actual operating state (heating/cooling/idle), not just the target mode
+- **Lock jam detection** — Detects and reports lock jams via SmartRent notification events
+- **Battery monitoring** — Battery level and low-battery alerts for locks and leak sensors
+- **Device online/offline status** — Reports device reachability for all device types
+- **Two-factor authentication** — Full TOTP support for secured SmartRent accounts
+- **Auto-lock** — Configurable timer to automatically re-lock after unlocking
+- **Per-device toggles** — Enable or disable any device type independently via config
 
 <br>
 
@@ -72,14 +89,20 @@ Homebridge SmartRent currently supports these devices through a SmartRent hub:
 
 ## Configuration
 
-All configuration values are strings.
-
-| Property    | Description                                                                                                                          |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `email`     | SmartRent account email                                                                                                              |
-| `password`  | SmartRent account password                                                                                                           |
-| `tfaSecret` | If you have enabled two-factor authentication on your SmartRent account, enter the secret used to seed the 2FA token                 |
-| `unitName`  | Only necessary if you have multiple units in your SmartRent account. Get the name from the top of the More tab in the SmartRent app. |
+| Property                  | Type    | Default    | Description                                                                                          |
+| ------------------------- | ------- | ---------- | ---------------------------------------------------------------------------------------------------- |
+| `email`                   | string  | _required_ | SmartRent account email                                                                              |
+| `password`                | string  | _required_ | SmartRent account password                                                                           |
+| `tfaSecret`               | string  |            | 32-character TOTP seed for two-factor authentication                                                 |
+| `unitName`                | string  |            | Unit name — only needed if you have multiple units. Find it in the SmartRent app under the More tab. |
+| `enableLocks`             | boolean | `true`     | Enable lock accessories                                                                              |
+| `enableThermostats`       | boolean | `true`     | Enable thermostat accessories                                                                        |
+| `enableLeakSensors`       | boolean | `true`     | Enable leak sensor accessories                                                                       |
+| `enableMotionSensors`     | boolean | `true`     | Enable motion sensor accessories                                                                     |
+| `enableSwitches`          | boolean | `true`     | Enable switch accessories                                                                            |
+| `enableSwitchMultiLevels` | boolean | `true`     | Enable dimmer/multilevel switch accessories                                                          |
+| `enableAutoLock`          | boolean | `false`    | Automatically re-lock after unlocking                                                                |
+| `autoLockDelayInMinutes`  | integer | `5`        | Minutes to wait before auto-locking                                                                  |
 
 <br>
 

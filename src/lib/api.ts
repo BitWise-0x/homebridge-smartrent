@@ -110,11 +110,9 @@ export class SmartRentApi {
       this.platform.log.error('No devices found');
     }
 
-    for (const i in devices) {
-      this.platform.log.debug('device: ', devices[i]);
-      const device = devices[i];
+    for (const device of devices) {
+      this.platform.log.debug('device: ', device);
       await this.websocket.subscribeDevice(device.id);
-      // (await websocket.wsClient).send(JSON.stringify(<WSPayload>[null, null, `devices:${device.id}`, 'phx_join', {}]))
     }
 
     return devices;

@@ -5,6 +5,7 @@ import {
   SmartRentAccessory,
   LockAccessory,
   LeakSensorAccessory,
+  MotionSensorAccessory,
   SwitchAccessory,
   ThermostatAccessory,
   SwitchMultilevelAccessory,
@@ -18,7 +19,7 @@ import { SmartRentPlatformConfig } from './lib/config.js';
  */
 export class SmartRentPlatform implements DynamicPlatformPlugin {
   public readonly smartRentApi: SmartRentApi;
-  public readonly accessories: SmartRentAccessory[] = [];
+  public accessories: SmartRentAccessory[] = [];
 
   private readonly ALLOWED_DEVICE_TYPES: Set<string> = new Set([
     'sensor_notification',
@@ -38,8 +39,12 @@ export class SmartRentPlatform implements DynamicPlatformPlugin {
     log.debug('Finished initializing platform:', this.config.platform);
 
     this.api.on('didFinishLaunching', async () => {
-      if (await this.smartRentApi.client.getAccessToken()) {
-        await this.discoverDevices();
+      try {
+        if (await this.smartRentApi.client.getAccessToken()) {
+          await this.discoverDevices();
+        }
+      } catch (error) {
+        log.error('Failed to initialize SmartRent platform:', error);
       }
       log.debug('Executed didFinishLaunching callback');
     });
@@ -62,6 +67,7 @@ export class SmartRentPlatform implements DynamicPlatformPlugin {
     let Accessory:
       | typeof LeakSensorAccessory
       | typeof LockAccessory
+      | typeof MotionSensorAccessory
       | typeof SwitchAccessory
       | typeof ThermostatAccessory
       | typeof SwitchMultilevelAccessory;
@@ -80,6 +86,12 @@ export class SmartRentPlatform implements DynamicPlatformPlugin {
       this.config.enableLeakSensors
     ) {
       Accessory = LeakSensorAccessory;
+    } else if (
+      type === 'sensor_notification' &&
+      attributeNames.includes('motion_binary') &&
+      this.config.enableMotionSensors
+    ) {
+      Accessory = MotionSensorAccessory;
     } else if (type === 'entry_control' && this.config.enableLocks) {
       Accessory = LockAccessory;
     } else if (type === 'switch_binary' && this.config.enableSwitches) {
@@ -123,9 +135,9 @@ export class SmartRentPlatform implements DynamicPlatformPlugin {
     // create the accessory handler for the newly create accessory
     // this is imported from `platformAccessory.ts`
     new Accessory(this, accessory); //NOSONAR
-    this.accessories.push(accessory);
 
     if (!accessoryExists) {
+      this.accessories.push(accessory);
       // link the accessory to the platform
       this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [
         accessory,
@@ -157,7 +169,7 @@ export class SmartRentPlatform implements DynamicPlatformPlugin {
     });
 
     // remove platform accessories when no longer present
-    this.accessories.forEach(existingAccessory => {
+    this.accessories = this.accessories.filter(existingAccessory => {
       if (!uuids.includes(existingAccessory.UUID)) {
         this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [
           existingAccessory,
@@ -166,7 +178,9 @@ export class SmartRentPlatform implements DynamicPlatformPlugin {
           'Removing existing accessory from cache:',
           existingAccessory.displayName
         );
+        return false;
       }
+      return true;
     });
   }
 }

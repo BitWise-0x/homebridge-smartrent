@@ -114,6 +114,10 @@ export class ThermostatAccessory {
       accessory.context.device.name
     );
 
+    this.thermostatService
+      .getCharacteristic(this.platform.api.hap.Characteristic.StatusActive)
+      .onGet(() => this.accessory.context.device.online);
+
     // create handlers for required characteristics
     this.thermostatService
       .getCharacteristic(
@@ -211,6 +215,39 @@ export class ThermostatAccessory {
       case 'current_humidity':
         this.handleHumidtyChange(event);
         break;
+      case 'operating_state':
+        this.handleOperatingStateChange(event);
+        break;
+    }
+  }
+
+  private handleOperatingStateChange(event: WSEvent) {
+    const currentState = this.toCurrentHeatingCoolingStateFromOperatingState(
+      event.last_read_state
+    );
+    this.state.heating_cooling_state.current = currentState;
+    this.thermostatService.updateCharacteristic(
+      this.platform.api.hap.Characteristic.CurrentHeatingCoolingState,
+      currentState
+    );
+  }
+
+  private toCurrentHeatingCoolingStateFromOperatingState(
+    operatingState: string
+  ) {
+    switch (operatingState) {
+      case 'heating':
+        return this.platform.api.hap.Characteristic.CurrentHeatingCoolingState
+          .HEAT;
+      case 'cooling':
+        return this.platform.api.hap.Characteristic.CurrentHeatingCoolingState
+          .COOL;
+      case 'idle':
+      case 'off':
+      case 'fan_only':
+      default:
+        return this.platform.api.hap.Characteristic.CurrentHeatingCoolingState
+          .OFF;
     }
   }
 
@@ -259,41 +296,21 @@ export class ThermostatAccessory {
   }
 
   private handleModeChange(event: WSEvent) {
-    const mode = this.toTargetHeatingCoolingStateCharacteristic(
+    const targetMode = this.toTargetHeatingCoolingStateCharacteristic(
       event.last_read_state as ThermostatMode
     );
-    let actualMode = mode;
-    if (
-      mode ===
-      this.platform.api.hap.Characteristic.TargetHeatingCoolingState.AUTO
-    ) {
-      // Determine if heating or cooling based on target and current temperature
-      if (
-        this.state.target_temperature.current <
-        this.state.current_temperature.current
-      ) {
-        actualMode =
-          this.platform.api.hap.Characteristic.CurrentHeatingCoolingState.COOL;
-      } else if (
-        this.state.target_temperature.current >
-        this.state.current_temperature.current
-      ) {
-        actualMode =
-          this.platform.api.hap.Characteristic.CurrentHeatingCoolingState.HEAT;
-      } else {
-        actualMode =
-          this.platform.api.hap.Characteristic.CurrentHeatingCoolingState.OFF;
-      }
-    }
-    this.state.heating_cooling_state.current = actualMode;
-    this.state.heating_cooling_state.target = mode;
-    this.thermostatService.updateCharacteristic(
-      this.platform.api.hap.Characteristic.CurrentHeatingCoolingState,
-      actualMode
+    const currentMode = this.toCurrentHeatingCoolingStateCharacteristic(
+      event.last_read_state as ThermostatMode
     );
+    this.state.heating_cooling_state.target = targetMode;
+    this.state.heating_cooling_state.current = currentMode;
     this.thermostatService.updateCharacteristic(
       this.platform.api.hap.Characteristic.TargetHeatingCoolingState,
-      mode
+      targetMode
+    );
+    this.thermostatService.updateCharacteristic(
+      this.platform.api.hap.Characteristic.CurrentHeatingCoolingState,
+      currentMode
     );
   }
 
@@ -316,6 +333,7 @@ export class ThermostatAccessory {
         return this.platform.api.hap.Characteristic.CurrentHeatingCoolingState
           .COOL;
       case 'heat':
+      case 'aux_heat':
         return this.platform.api.hap.Characteristic.CurrentHeatingCoolingState
           .HEAT;
       case 'off':
@@ -333,6 +351,7 @@ export class ThermostatAccessory {
         return this.platform.api.hap.Characteristic.TargetHeatingCoolingState
           .COOL;
       case 'heat':
+      case 'aux_heat':
         return this.platform.api.hap.Characteristic.TargetHeatingCoolingState
           .HEAT;
       case 'auto':
@@ -346,7 +365,7 @@ export class ThermostatAccessory {
   }
 
   private fromTargetHeatingCoolingStateCharacteristic(
-    targetHeatingCoolingState
+    targetHeatingCoolingState: CharacteristicValue
   ): ThermostatMode {
     switch (targetHeatingCoolingState) {
       case this.platform.api.hap.Characteristic.TargetHeatingCoolingState.COOL:
@@ -391,7 +410,7 @@ export class ThermostatAccessory {
     temperature: number
   ): DeviceAttribute[] {
     const target_temp = this.fromTemperatureCharacteristic(temperature);
-    switch (this.state.heating_cooling_state.current) {
+    switch (this.state.heating_cooling_state.target) {
       case this.platform.api.hap.Characteristic.TargetHeatingCoolingState.OFF:
       case this.platform.api.hap.Characteristic.TargetHeatingCoolingState.COOL:
         return [{ name: 'cooling_setpoint', state: target_temp }];
@@ -481,9 +500,15 @@ export class ThermostatAccessory {
     this.platform.log.debug('Triggered GET CurrentHeatingCoolingState');
     try {
       const thermostatAttributes = await this._getState();
-      const currentValue = this.toCurrentHeatingCoolingStateCharacteristic(
-        findStateByName(thermostatAttributes, 'mode') as ThermostatMode
-      );
+      const operatingState = findStateByName(
+        thermostatAttributes,
+        'operating_state'
+      ) as string | null;
+      const currentValue = operatingState
+        ? this.toCurrentHeatingCoolingStateFromOperatingState(operatingState)
+        : this.toCurrentHeatingCoolingStateCharacteristic(
+            findStateByName(thermostatAttributes, 'mode') as ThermostatMode
+          );
       this.state.heating_cooling_state.current = currentValue;
       return currentValue;
     } catch (error) {
@@ -519,7 +544,7 @@ export class ThermostatAccessory {
   /**
    * Handle requests to set the "Target Heating Cooling State" characteristic
    */
-  async handleTargetHeatingCoolingStateSet(value) {
+  async handleTargetHeatingCoolingStateSet(value: CharacteristicValue) {
     this.platform.log.debug('Triggered SET TargetHeatingCoolingState:', value);
     this.state.heating_cooling_state.target = value;
     const mode = this.fromTargetHeatingCoolingStateCharacteristic(value);
@@ -556,9 +581,6 @@ export class ThermostatAccessory {
     }
   }
 
-  // ...repeat similar improvements for other handlers...
-
-  // --- Improved fan mode conversion ---
   private fromFanOnCharacteristic(on: boolean): ThermostatFanMode {
     return on ? 'on' : 'auto';
   }
@@ -670,7 +692,7 @@ export class ThermostatAccessory {
   /**
    * Handle requests to set the "Temperature Display Units" characteristic
    */
-  async handleTemperatureDisplayUnitsSet(value) {
+  async handleTemperatureDisplayUnitsSet(value: CharacteristicValue) {
     this.platform.log.debug('Triggered SET TemperatureDisplayUnits:', value);
   }
 
@@ -717,14 +739,14 @@ export class ThermostatAccessory {
   /**
    * Handle requests to set the "Cooling Threshold Temperature" characteristic
    */
-  async handleCoolingThresholdTemperatureSet(value) {
+  async handleCoolingThresholdTemperatureSet(value: CharacteristicValue) {
     this.platform.log.debug(
       'Triggered SET CoolingThresholdTemperature:',
       value
     );
 
     this.state.cooling_threshold_temperature.target = value;
-    const cooling_setpoint = this.fromTemperatureCharacteristic(value);
+    const cooling_setpoint = this.fromTemperatureCharacteristic(Number(value));
     const newAttributes = [
       { name: 'cooling_setpoint', state: cooling_setpoint },
     ];
@@ -765,14 +787,14 @@ export class ThermostatAccessory {
   /**
    * Handle requests to set the "Heating Threshold Temperature" characteristic
    */
-  async handleHeatingThresholdTemperatureSet(value) {
+  async handleHeatingThresholdTemperatureSet(value: CharacteristicValue) {
     this.platform.log.debug(
       'Triggered SET HeatingThresholdTemperature:',
       value
     );
 
     this.state.heating_threshold_temperature.target = value;
-    const heating_setpoint = this.fromTemperatureCharacteristic(value);
+    const heating_setpoint = this.fromTemperatureCharacteristic(Number(value));
     const newAttributes = [
       { name: 'heating_setpoint', state: heating_setpoint },
     ];
@@ -810,7 +832,7 @@ export class ThermostatAccessory {
   /**
    * Handle requests to set the "On" characteristic
    */
-  async handleOnSet(value) {
+  async handleOnSet(value: CharacteristicValue) {
     this.platform.log.debug('Triggered SET On:', value);
 
     this.state.fan_on.target = value;

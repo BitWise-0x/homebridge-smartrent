@@ -1,6 +1,7 @@
 import { CharacteristicValue, Service } from 'homebridge';
 import { SmartRentPlatform } from '../platform.js';
 import type { SmartRentAccessory } from './index.js';
+import { LeakSensorData } from '../devices/leakSensor.js';
 import { WSEvent } from '../lib/client.js';
 import { findStateByName } from '../lib/utils.js';
 
@@ -11,6 +12,8 @@ import { findStateByName } from '../lib/utils.js';
  */
 export class LeakSensorAccessory {
   private readonly service: Service;
+  private readonly battery: Service;
+  private _batteryDataCache: Promise<LeakSensorData> | null = null;
 
   private readonly state: {
     hubId: string;
@@ -52,11 +55,26 @@ export class LeakSensorAccessory {
       accessory.context.device.name
     );
 
+    this.service
+      .getCharacteristic(this.platform.api.hap.Characteristic.StatusActive)
+      .onGet(() => this.accessory.context.device.online);
+
     // create handlers for required characteristics
     // see https://developers.homebridge.io/#/service/LeakSensor
     this.service
       .getCharacteristic(this.platform.api.hap.Characteristic.LeakDetected)
       .onGet(this.handleLeakDetected.bind(this));
+
+    // set the battery level service for the leak sensor accessory
+    this.battery =
+      this.accessory.getService(this.platform.api.hap.Service.Battery) ||
+      this.accessory.addService(this.platform.api.hap.Service.Battery);
+    this.battery
+      .getCharacteristic(this.platform.api.hap.Characteristic.BatteryLevel)
+      .onGet(this.handleBatteryLevelGet.bind(this));
+    this.battery
+      .getCharacteristic(this.platform.api.hap.Characteristic.StatusLowBattery)
+      .onGet(this.handleStatusLowBatteryGet.bind(this));
 
     // subscribe to device events
     this.platform.smartRentApi.websocket.event[this.state.deviceId] = (
@@ -89,6 +107,59 @@ export class LeakSensorAccessory {
       : this.platform.api.hap.Characteristic.LeakDetected.LEAK_NOT_DETECTED;
     this.state.leak.current = currentValue;
     return currentValue;
+  }
+
+  private _getBatteryData(): Promise<LeakSensorData> {
+    if (!this._batteryDataCache) {
+      this._batteryDataCache =
+        this.platform.smartRentApi.getData<LeakSensorData>(
+          this.state.hubId,
+          this.state.deviceId
+        );
+      this._batteryDataCache.finally(() => {
+        setTimeout(() => {
+          this._batteryDataCache = null;
+        }, 500);
+      });
+    }
+    return this._batteryDataCache;
+  }
+
+  async handleBatteryLevelGet(): Promise<CharacteristicValue> {
+    const deviceName = this.accessory.context.device.name;
+    this.platform.log.debug(`Reading battery level for "${deviceName}"`);
+    try {
+      const data = await this._getBatteryData();
+      const batteryLevel = Math.round(Number(data.battery_level));
+      this.platform.log.info(`"${deviceName}" battery level: ${batteryLevel}%`);
+      return batteryLevel;
+    } catch (error) {
+      this.platform.log.error(
+        `Failed to get battery level for "${deviceName}":`,
+        error
+      );
+      throw error;
+    }
+  }
+
+  async handleStatusLowBatteryGet(): Promise<CharacteristicValue> {
+    const deviceName = this.accessory.context.device.name;
+    try {
+      const data = await this._getBatteryData();
+      const batteryLevel = Math.round(Number(data.battery_level));
+      return batteryLevel <= 20
+        ? this.platform.api.hap.Characteristic.StatusLowBattery
+            .BATTERY_LEVEL_LOW
+        : this.platform.api.hap.Characteristic.StatusLowBattery
+            .BATTERY_LEVEL_NORMAL;
+    } catch (error) {
+      this.platform.log.error(
+        `Failed to get low battery status for "${deviceName}":`,
+        error
+      );
+      return this.platform.api.hap.Characteristic.StatusLowBattery
+        .BATTERY_LEVEL_NORMAL;
+    }
   }
 
   /**

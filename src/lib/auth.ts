@@ -121,12 +121,14 @@ export class SmartRentAuthClient {
    * @returns SmartRent response data payload
    */
   private _handleResponse(response: AxiosResponse) {
-    this.log.debug('Response:', JSON.stringify(response.data, null, 2));
+    this.log.debug(`Auth Response: ${response.status} ${response.statusText}`);
     return response;
   }
 
   private _handleRequest(config: InternalAxiosRequestConfig) {
-    this.log.debug('Request:', JSON.stringify(config, null, 2));
+    this.log.debug(
+      `Auth Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`
+    );
     return config;
   }
 
@@ -244,10 +246,14 @@ export class SmartRentAuthClient {
     }
 
     // Attempt to start a session using the given email and password
-    const sessionData = (await this._startBasicSession({
+    const sessionData = await this._startBasicSession({
       email: email,
       password,
-    })) as unknown as SessionData;
+    });
+
+    if (!sessionData) {
+      return;
+    }
 
     // If authentication is complete, return the session
     if (SmartRentAuthClient._isOauthSession(sessionData)) {

@@ -35,6 +35,12 @@
         "default": true,
         "description": "Uncheck to disable leak sensors."
       },
+      "enableMotionSensors": {
+        "title": "Enable motion sensors",
+        "type": "boolean",
+        "default": true,
+        "description": "Uncheck to disable motion sensors."
+      },
       "enableThermostats": {
         "title": "Enable thermostats",
         "type": "boolean",
@@ -74,6 +80,8 @@
         "title": "Auto lock delay in minutes",
         "type": "integer",
         "default": 5,
+        "minimum": 1,
+        "maximum": 1440,
         "description": "The delay in minutes after the last unlock to automatically lock the door."
       }
     },

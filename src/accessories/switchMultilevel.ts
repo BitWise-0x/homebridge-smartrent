@@ -62,6 +62,10 @@ export class SwitchMultilevelAccessory {
       accessory.context.device.name
     );
 
+    this.service
+      .getCharacteristic(this.platform.api.hap.Characteristic.StatusActive)
+      .onGet(() => this.accessory.context.device.online);
+
     // create handlers for required characteristics
     // see https://developers.homebridge.io/#/service/Lightbulb
     this.service
@@ -88,16 +92,20 @@ export class SwitchMultilevelAccessory {
       'Received websocket Switch Multilevel event:',
       event
     );
-    if (event.name !== 'on') {
-      return;
+
+    if (event.name === 'level') {
+      const level = Number(event.last_read_state);
+      this.state.brightness.current = level;
+      this.state.on.current = level > 0 ? 1 : 0;
+      this.service.updateCharacteristic(
+        this.platform.api.hap.Characteristic.Brightness,
+        level
+      );
+      this.service.updateCharacteristic(
+        this.platform.api.hap.Characteristic.On,
+        this.state.on.current
+      );
     }
-
-    this.state.on.current = 0;
-
-    this.service.updateCharacteristic(
-      this.platform.api.hap.Characteristic.On,
-      this.state.on.current
-    );
   }
 
   /**
@@ -154,16 +162,16 @@ export class SwitchMultilevelAccessory {
       switchMultilevelAttributes,
       'level'
     ) as number;
-    this.state.on.current = level;
+    this.state.brightness.current = level;
     return level;
   }
 
   /**
-   * Handle requests to set the "On" characteristic
+   * Handle requests to set the "Brightness" characteristic
    */
   async handleBrightnessSet(value: CharacteristicValue) {
     this.platform.log.debug('Triggered SET Brightness:', value);
-    this.state.on.target = value;
+    this.state.brightness.target = value;
     const newAttributes = [{ name: 'level', state: Number(value) }];
     const switchMultilevelAttributes =
       await this.platform.smartRentApi.setState<SwitchMultilevelData>(
@@ -171,7 +179,7 @@ export class SwitchMultilevelAccessory {
         this.state.deviceId,
         newAttributes
       );
-    this.state.on.current = findStateByName(
+    this.state.brightness.current = findStateByName(
       switchMultilevelAttributes,
       'level'
     ) as number;

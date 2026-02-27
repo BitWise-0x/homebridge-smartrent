@@ -54,6 +54,10 @@ export class SwitchAccessory {
       accessory.context.device.name
     );
 
+    this.service
+      .getCharacteristic(this.platform.api.hap.Characteristic.StatusActive)
+      .onGet(() => this.accessory.context.device.online);
+
     // create handlers for required characteristics
     // see https://developers.homebridge.io/#/service/Switch
     this.service
@@ -76,7 +80,7 @@ export class SwitchAccessory {
       return;
     }
 
-    this.state.on.current = event.last_read_state === 'true' ? 0 : 1;
+    this.state.on.current = event.last_read_state === 'true' ? 1 : 0;
     this.service.updateCharacteristic(
       this.platform.api.hap.Characteristic.On,
       this.state.on.current

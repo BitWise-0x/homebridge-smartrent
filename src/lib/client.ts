@@ -28,7 +28,10 @@ export type WSEvent = {
     | 'mode'
     | 'locked'
     | 'on'
-    | 'notifications';
+    | 'notifications'
+    | 'motion_binary'
+    | 'operating_state'
+    | 'level';
   remote_id: string;
   type: string;
   last_read_state: string;
@@ -116,8 +119,9 @@ export class SmartRentApiClient {
    * @returns SmartRent response data payload
    */
   private _handleResponse(response: AxiosResponse) {
-    // Only log response size and status, not the full payload
-    const dataSize = JSON.stringify(response.data).length;
+    const dataSize =
+      response.headers['content-length'] ??
+      JSON.stringify(response.data).length;
     this.log.debug(
       `API Response: ${response.status} ${response.statusText} (${dataSize} bytes)`
     );
@@ -159,6 +163,7 @@ export class SmartRentWebsocketClient extends SmartRentApiClient {
   private readonly devices: number[];
   private _reconnecting = false;
   private _subscribeRetries: Record<number, number> = {};
+  private _heartbeatInterval: NodeJS.Timeout | null = null;
 
   constructor(readonly platform: SmartRentPlatform) {
     super(platform);
@@ -200,10 +205,10 @@ export class SmartRentWebsocketClient extends SmartRentApiClient {
    */
   private async _initializeWsClient(): Promise<WebSocket | undefined> {
     this.log.debug('WebSocket connection opening');
-    const token = await this.getAccessToken();
+    const token = await this.getWebSocketToken();
     if (!token || token === 'undefined') {
       this.log.warn(
-        'Authentication failed: No access token! SmartRent WebSocket features disabled.'
+        'Authentication failed: No WebSocket token! SmartRent WebSocket features disabled.'
       );
       return undefined;
     }
@@ -224,7 +229,7 @@ export class SmartRentWebsocketClient extends SmartRentApiClient {
 
       wsClient.onopen = () => {
         clearTimeout(connectionTimeout);
-        this._handleWsOpen();
+        this._handleWsOpen(wsClient);
         resolve(wsClient);
       };
       wsClient.onmessage = this._handleWsMessage.bind(this);
@@ -237,10 +242,28 @@ export class SmartRentWebsocketClient extends SmartRentApiClient {
     });
   }
 
-  private _handleWsOpen() {
+  private _handleWsOpen(ws: WebSocket) {
     this.log.debug('WebSocket connection opened');
     this._subscribeRetries = {};
+    this._startHeartbeat(ws);
     this.devices.forEach(device => this.subscribeDevice(device));
+  }
+
+  private _startHeartbeat(ws: WebSocket) {
+    this._stopHeartbeat();
+    this._heartbeatInterval = setInterval(() => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify([null, null, 'phoenix', 'heartbeat', {}]));
+        this.log.debug('WebSocket heartbeat sent');
+      }
+    }, 30000);
+  }
+
+  private _stopHeartbeat() {
+    if (this._heartbeatInterval) {
+      clearInterval(this._heartbeatInterval);
+      this._heartbeatInterval = null;
+    }
   }
 
   private _handleWsMessage(message: WebSocket.MessageEvent) {
@@ -264,12 +287,17 @@ export class SmartRentWebsocketClient extends SmartRentApiClient {
     this._reconnecting = true;
     setTimeout(() => {
       this._reconnecting = false;
-      this.wsClient = this._initializeWsClient();
+      this.wsClient = this._initializeWsClient().catch(err => {
+        this.log.error('WebSocket reconnection failed:', err);
+        this._scheduleReconnect();
+        return undefined;
+      });
     }, 5000);
   }
 
   private _handleWsError(error: WebSocket.ErrorEvent) {
     this.log.error(`WebSocket error: ${error.message}`);
+    this._stopHeartbeat();
     this.wsClient.then(client => client?.close());
     this._scheduleReconnect();
   }
@@ -278,6 +306,7 @@ export class SmartRentWebsocketClient extends SmartRentApiClient {
     this.log.debug(
       `WebSocket connection closed: Code: ${event.code}, Reason: ${event.reason}`
     );
+    this._stopHeartbeat();
     this._scheduleReconnect();
   }
 

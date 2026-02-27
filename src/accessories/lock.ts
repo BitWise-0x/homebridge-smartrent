@@ -15,6 +15,7 @@ export class LockAccessory {
   private readonly battery: Service;
   private timer?: NodeJS.Timeout;
   private timerSet: boolean = false;
+  private _batteryDataCache: Promise<LockData> | null = null;
 
   private readonly state: {
     hubId: string;
@@ -53,6 +54,9 @@ export class LockAccessory {
     this.battery
       .getCharacteristic(this.platform.api.hap.Characteristic.BatteryLevel)
       .onGet(this.handleBatteryLevelGet.bind(this));
+    this.battery
+      .getCharacteristic(this.platform.api.hap.Characteristic.StatusLowBattery)
+      .onGet(this.handleStatusLowBatteryGet.bind(this));
 
     // get the LockMechanism service if it exists, otherwise create a new LockMechanism service
     this.service =
@@ -64,6 +68,10 @@ export class LockAccessory {
       this.platform.api.hap.Characteristic.Name,
       accessory.context.device.name
     );
+
+    this.service
+      .getCharacteristic(this.platform.api.hap.Characteristic.StatusActive)
+      .onGet(() => this.accessory.context.device.online);
 
     // create handlers for required characteristics
     // see https://developers.homebridge.io/#/service/LockMechanism
@@ -81,6 +89,21 @@ export class LockAccessory {
       this.handleLockEvent.bind(this);
   }
 
+  private _getBatteryData(): Promise<LockData> {
+    if (!this._batteryDataCache) {
+      this._batteryDataCache = this.platform.smartRentApi.getData<LockData>(
+        this.state.hubId,
+        this.state.deviceId
+      );
+      this._batteryDataCache.finally(() => {
+        setTimeout(() => {
+          this._batteryDataCache = null;
+        }, 500);
+      });
+    }
+    return this._batteryDataCache;
+  }
+
   /**
    * Handle requests to get the current value of the "Battery Level" characteristic
    */
@@ -89,14 +112,9 @@ export class LockAccessory {
     this.platform.log.debug(`Reading battery level for "${deviceName}"`);
 
     try {
-      const lockData = await this.platform.smartRentApi.getData<LockData>(
-        this.state.hubId,
-        this.state.deviceId
-      );
-
+      const lockData = await this._getBatteryData();
       const batteryLevel = Math.round(Number(lockData.battery_level));
       this.platform.log.info(`"${deviceName}" battery level: ${batteryLevel}%`);
-
       return batteryLevel;
     } catch (error) {
       this.platform.log.error(
@@ -104,6 +122,26 @@ export class LockAccessory {
         error
       );
       throw error;
+    }
+  }
+
+  async handleStatusLowBatteryGet(): Promise<CharacteristicValue> {
+    const deviceName = this.accessory.context.device.name;
+    try {
+      const lockData = await this._getBatteryData();
+      const batteryLevel = Math.round(Number(lockData.battery_level));
+      return batteryLevel <= 20
+        ? this.platform.api.hap.Characteristic.StatusLowBattery
+            .BATTERY_LEVEL_LOW
+        : this.platform.api.hap.Characteristic.StatusLowBattery
+            .BATTERY_LEVEL_NORMAL;
+    } catch (error) {
+      this.platform.log.error(
+        `Failed to get low battery status for "${deviceName}":`,
+        error
+      );
+      return this.platform.api.hap.Characteristic.StatusLowBattery
+        .BATTERY_LEVEL_NORMAL;
     }
   }
 
@@ -217,9 +255,14 @@ export class LockAccessory {
       this.timerSet = true;
       this.timer = setTimeout(
         async () => {
-          this.platform.log.debug('Relocking lock');
-          await this.handleLockTargetStateSet(true);
-          this.timerSet = false;
+          try {
+            this.platform.log.debug('Relocking lock');
+            await this.handleLockTargetStateSet(true);
+          } catch (error) {
+            this.platform.log.error('Auto-lock failed:', error);
+          } finally {
+            this.timerSet = false;
+          }
         },
         this.platform.config.autoLockDelayInMinutes * 60 * 1000
       );
@@ -235,6 +278,12 @@ export class LockAccessory {
    */
   async handleLockEvent(event: WSEvent) {
     this.platform.log.debug('Received event on Lock: ', event);
+
+    if (event.name === 'notifications') {
+      this.handleNotificationEvent(event);
+      return;
+    }
+
     if (event.name !== this.LOCKED) {
       return;
     }
@@ -252,6 +301,23 @@ export class LockAccessory {
       currentValue
     );
     this.scheduleAutoLock(currentValue);
+  }
+
+  private handleNotificationEvent(event: WSEvent) {
+    const deviceName = this.accessory.context.device.name;
+    const message = event.last_read_state?.toLowerCase() ?? '';
+
+    this.platform.log.debug(
+      `Lock "${deviceName}" notification: "${event.last_read_state}"`
+    );
+
+    if (message.includes('jammed')) {
+      this.platform.log.warn(`Lock "${deviceName}" is jammed!`);
+      this.service.updateCharacteristic(
+        this.platform.api.hap.Characteristic.LockCurrentState,
+        this.platform.api.hap.Characteristic.LockCurrentState.JAMMED
+      );
+    }
   }
 
   /**
