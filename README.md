@@ -46,7 +46,7 @@ Homebridge SmartRent currently supports these devices through a SmartRent hub:
 
 3. Log in to SmartRent through the settings panel, and optionally set your unit name.
 
-![Plugin settings screenshot](screenshot.png)
+![Plugin settings screenshot](homebridge-ui/public/screenshot1.png)
 
 ### Manual
 
@@ -64,6 +64,8 @@ Homebridge SmartRent currently supports these devices through a SmartRent hub:
    homebridge -D
    ```
 
+![Homebridge dashboard](homebridge-ui/public/screenshot2.png)
+
 ## Configuration
 
 All configuration values are strings.
@@ -77,87 +79,47 @@ All configuration values are strings.
 
 ## 🛠 Development
 
-### Setup Development Environment
+### Prerequisites
 
-To develop Homebridge SmartRent you must have Node.js 12 or later installed, and a modern code editor such as [VS Code](https://code.visualstudio.com/). This plugin template uses [TypeScript](https://www.typescriptlang.org/) to make development easier and comes with pre-configured settings for [VS Code](https://code.visualstudio.com/) and ESLint. If you are using VS Code install these extensions:
+- Node.js 18.20.4+, 20.18.0+, 22.10.0+, or 24.0.0+
+- Homebridge 1.8.0+ or 2.0.0-beta+
 
-- [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
-- [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
-- [EditorConfig](https://marketplace.visualstudio.com/items?itemName=EditorConfig.EditorConfig)
-
-### Install Development Dependencies
-
-Using a terminal, navigate to the project folder and run this command to install the development dependencies:
+### Setup
 
 ```sh
-
 npm install
-
-```
-
-### Build Plugin
-
-TypeScript needs to be compiled into JavaScript before it can run. The following command will compile the contents of your [`src`](./src) directory and put the resulting code into the `dist` folder.
-
-```sh
-
 npm run build
-
-```
-
-### Link To Homebridge
-
-Run this command so your global install of Homebridge can discover the plugin in your development environment:
-
-```sh
-
 npm link
-
 ```
 
-You can now start Homebridge, use the `-D` flag so you can see debug log messages in your plugin:
+### Watch Mode
+
+Automatically recompiles and restarts Homebridge on source changes:
 
 ```sh
-
-homebridge -D
-
-```
-
-### Watch For Changes and Build Automatically
-
-If you want to have your code compile automatically as you make changes, and restart Homebridge automatically between changes you can run:
-
-```sh
-
 npm run watch
-
 ```
 
-This will launch an instance of Homebridge in debug mode which will restart every time you make a change to the source code. It will load the config stored in the default location under `~/.homebridge`. You may need to stop other running instances of Homebridge while using this command to prevent conflicts. You can adjust the Homebridge startup command in the [`nodemon.json`](./nodemon.json) file.
+This runs a local Homebridge instance in debug mode using the config at `./test/hbConfig/`. Stop any other Homebridge instances first to avoid port conflicts. The watch behavior can be adjusted in [`nodemon.json`](./nodemon.json).
 
-## Help! I'm Having Issues!
+### Linting & Formatting
 
-If you are having issues with this plugin, please check the following:
+```sh
+npm run lint        # check for lint errors
+npm run lint:fix    # auto-fix lint errors
+npm run prettier    # check formatting
+npm run format      # auto-fix formatting
+```
 
-- [Homebridge Basic Troubleshooting](https://github.com/homebridge/homebridge/wiki/Basic-Troubleshooting)
+Commits must follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/#summary) — enforced by pre-commit hooks via [commitlint](https://commitlint.js.org/) and [husky](https://typicode.github.io/husky/).
 
-If you're still having issues, let us know by opening
-an [issue](https://github.com/BitWise-0x/homebridge-smartrent/issues/new/choose) on GitHub. Please fill out
-the template with as much information as possible to help us help you.
+## Troubleshooting
 
-## I Have an Idea for a New Feature!
+If you run into issues, check the [Homebridge troubleshooting wiki](https://github.com/homebridge/homebridge/wiki/Basic-Troubleshooting) first. If the problem persists, [open an issue](https://github.com/BitWise-0x/homebridge-smartrent/issues/new/choose) with as much detail as possible.
 
-If you have a feature request, please checkout our [Contribution](./CONTRIBUTING.md) guide and open
-a [feature request issue](https://github.com/BitWise-0x/homebridge-smartrent/issues/new?template=feature-request.md)
+## Contributing
 
-## I Want to Contribute!
-
-If you want to contribute to this project, please checkout our [Contribution](./CONTRIBUTING.md) guide. We welcome
-contributions of all kinds!
-
-## Code of Conduct
-
-Please checkout our [Code of Conduct](./CODE_OF_CONDUCT.md) for more information.
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines on bug reports, feature requests, and code contributions.
 
 ## License
 
