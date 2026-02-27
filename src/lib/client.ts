@@ -40,7 +40,7 @@ export type WSEvent = {
 export type WSPayload = [null, null, WSDeviceList, string, WSEvent];
 
 export class SmartRentApiClient {
-  private readonly authClient: SmartRentAuthClient;
+  protected readonly authClient: SmartRentAuthClient;
   private readonly apiClient: AxiosInstance;
   protected readonly log: Logger | Console;
   private _cachedAccessToken: string | undefined;
@@ -178,6 +178,7 @@ export class SmartRentWebsocketClient extends SmartRentApiClient {
   public event: object;
   private readonly devices: number[];
   private _reconnecting = false;
+  private _reconnectAttempts = 0;
   private _subscribeRetries: Record<number, number> = {};
   private _heartbeatInterval: NodeJS.Timeout | null = null;
 
@@ -268,6 +269,7 @@ export class SmartRentWebsocketClient extends SmartRentApiClient {
 
   private _handleWsOpen(ws: WebSocket) {
     this.log.debug('WebSocket connection opened');
+    this._reconnectAttempts = 0;
     this._subscribeRetries = {};
     this._startHeartbeat(ws);
     this.devices.forEach(device => this.subscribeDevice(device));
@@ -309,6 +311,14 @@ export class SmartRentWebsocketClient extends SmartRentApiClient {
   private _scheduleReconnect() {
     if (this._reconnecting) return;
     this._reconnecting = true;
+    this._reconnectAttempts++;
+    const delay = Math.min(
+      5000 * Math.pow(2, this._reconnectAttempts - 1),
+      60000
+    );
+    this.log.warn(
+      `WebSocket reconnecting in ${delay / 1000}s (attempt ${this._reconnectAttempts})`
+    );
     setTimeout(() => {
       this._reconnecting = false;
       this.wsClient = this._initializeWsClient().catch(err => {
@@ -316,13 +326,16 @@ export class SmartRentWebsocketClient extends SmartRentApiClient {
         this._scheduleReconnect();
         return undefined;
       });
-    }, 5000);
+    }, delay);
   }
 
   private _handleWsError(error: WebSocket.ErrorEvent) {
     this.log.error(`WebSocket error: ${error.message}`);
     this._stopHeartbeat();
-    this.wsClient.then(client => client?.close());
+    this.wsClient.then(client => client?.close()).catch(() => {});
+    if (error.message?.includes('403')) {
+      this.authClient.clearWebSocketToken().catch(() => {});
+    }
     this._scheduleReconnect();
   }
 

@@ -46,7 +46,14 @@ export class SmartRentPlatform implements DynamicPlatformPlugin {
     this.api.on('didFinishLaunching', async () => {
       try {
         if (await this.smartRentApi.client.getAccessToken()) {
-          await this.smartRentApi.connect();
+          try {
+            await this.smartRentApi.connect();
+          } catch (wsError) {
+            log.warn(
+              'WebSocket connection failed — will retry in background:',
+              wsError
+            );
+          }
           await this.discoverDevices();
         }
       } catch (error) {

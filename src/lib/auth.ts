@@ -474,4 +474,17 @@ export class SmartRentAuthClient {
     }
     this.log.error('Failed to authenticate with SmartRent');
   }
+
+  /**
+   * Clear cached WebSocket token so the next connection fetches a fresh one.
+   * Persists to disk so reconnect flows don't re-read the stale token.
+   */
+  public async clearWebSocketToken() {
+    if (this.session) {
+      this.session.webSocketToken = undefined;
+      this.session.websocketExpires = undefined;
+      const sessionStr = JSON.stringify(this.session, null, 2);
+      await fsPromises.writeFile(this.sessionPath, sessionStr);
+    }
+  }
 }
