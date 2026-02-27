@@ -26,6 +26,8 @@ The most comprehensive [SmartRent](https://smartrent.com) HomeKit integration av
 
 ## Supported Devices
 
+<div align="center">
+
 | Device            | HomeKit Service         | Capabilities                                                                                                                                     |
 | ----------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 🔒 Locks          | LockMechanism + Battery | <ul><li>Lock/unlock</li><li>Battery level</li><li>Low battery alerts</li><li>Jam detection</li><li>Auto-lock timer</li></ul>                     |
@@ -34,6 +36,8 @@ The most comprehensive [SmartRent](https://smartrent.com) HomeKit integration av
 | 🔍 Motion Sensors | MotionSensor            | <ul><li>Motion detection</li><li>Real-time updates</li></ul>                                                                                     |
 | 🔌 Switches       | Switch                  | <ul><li>On/off control</li></ul>                                                                                                                 |
 | 💡 Dimmers        | Lightbulb               | <ul><li>On/off control</li><li>Brightness control</li></ul>                                                                                      |
+
+</div>
 
 All devices report online/offline status via the StatusActive characteristic.
 
