@@ -16,6 +16,7 @@ export class LockAccessory {
   private timer?: NodeJS.Timeout;
   private timerSet: boolean = false;
   private _batteryDataCache: Promise<LockData> | null = null;
+  private _cachedBatteryLevel: number;
 
   private readonly state: {
     hubId: string;
@@ -30,14 +31,25 @@ export class LockAccessory {
     private readonly platform: SmartRentPlatform,
     private readonly accessory: SmartRentAccessory
   ) {
+    const device = this.accessory.context.device;
+
+    // Populate initial lock state from discovery data
+    const initialLocked = findStateByName(device.attributes, 'locked');
+    const isLocked = initialLocked === 'true' || initialLocked === true;
+    const initialValue = isLocked
+      ? this.platform.api.hap.Characteristic.LockTargetState.SECURED
+      : this.platform.api.hap.Characteristic.LockTargetState.UNSECURED;
+
     this.state = {
-      hubId: this.accessory.context.device.room.hub_id.toString(),
-      deviceId: this.accessory.context.device.id.toString(),
+      hubId: device.room.hub_id.toString(),
+      deviceId: device.id.toString(),
       locked: {
-        current: this.platform.api.hap.Characteristic.LockTargetState.UNSECURED,
-        target: this.platform.api.hap.Characteristic.LockTargetState.UNSECURED,
+        current: initialValue,
+        target: initialValue,
       },
     };
+
+    this._cachedBatteryLevel = Math.round(Number(device.battery_level ?? 100));
 
     // set accessory information
     this.accessory
@@ -95,11 +107,15 @@ export class LockAccessory {
         this.state.hubId,
         this.state.deviceId
       );
-      this._batteryDataCache.finally(() => {
-        setTimeout(() => {
-          this._batteryDataCache = null;
-        }, 500);
-      });
+      this._batteryDataCache
+        .then(data => {
+          this._cachedBatteryLevel = Math.round(Number(data.battery_level));
+        })
+        .finally(() => {
+          setTimeout(() => {
+            this._batteryDataCache = null;
+          }, 30000);
+        });
     }
     return this._batteryDataCache;
   }
@@ -121,7 +137,7 @@ export class LockAccessory {
         `Failed to get battery level for "${deviceName}":`,
         error
       );
-      throw error;
+      return this._cachedBatteryLevel;
     }
   }
 
@@ -141,8 +157,12 @@ export class LockAccessory {
         `Failed to get low battery status for "${deviceName}":`,
         error
       );
-      return this.platform.api.hap.Characteristic.StatusLowBattery
-        .BATTERY_LEVEL_NORMAL;
+      const threshold = this.platform.config.lowBatteryThreshold ?? 20;
+      return this._cachedBatteryLevel <= threshold
+        ? this.platform.api.hap.Characteristic.StatusLowBattery
+            .BATTERY_LEVEL_LOW
+        : this.platform.api.hap.Characteristic.StatusLowBattery
+            .BATTERY_LEVEL_NORMAL;
     }
   }
 
@@ -154,35 +174,7 @@ export class LockAccessory {
   async handleLockCurrentStateGet(): Promise<CharacteristicValue> {
     const deviceName = this.accessory.context.device.name;
     this.platform.log.debug(`Reading lock state for "${deviceName}"`);
-
-    try {
-      const lockAttributes =
-        await this.platform.smartRentApi.getState<LockData>(
-          this.state.hubId,
-          this.state.deviceId
-        );
-
-      const locked = findStateByName(lockAttributes, this.LOCKED) as string;
-      const isLocked = locked === 'true';
-
-      const currentValue = isLocked
-        ? this.platform.api.hap.Characteristic.LockTargetState.SECURED
-        : this.platform.api.hap.Characteristic.LockTargetState.UNSECURED;
-
-      this.state.locked.current = currentValue;
-
-      this.platform.log.info(
-        `"${deviceName}" current lock state: ${isLocked ? 'LOCKED' : 'UNLOCKED'} (API: "${locked}")`
-      );
-
-      return currentValue;
-    } catch (error) {
-      this.platform.log.error(
-        `Failed to get lock state for "${deviceName}":`,
-        error
-      );
-      throw error;
-    }
+    return this.state.locked.current;
   }
 
   /**
@@ -193,14 +185,7 @@ export class LockAccessory {
       'Triggered GET LockTargetState',
       this.state.locked.target
     );
-    const lockAttributes = await this.platform.smartRentApi.getState<LockData>(
-      this.state.hubId,
-      this.state.deviceId
-    );
-    const locked = findStateByName(lockAttributes, this.LOCKED) as boolean;
-    return locked
-      ? this.platform.api.hap.Characteristic.LockTargetState.SECURED
-      : this.platform.api.hap.Characteristic.LockTargetState.UNSECURED;
+    return this.state.locked.target;
   }
 
   /**

@@ -26,12 +26,16 @@ export class SwitchAccessory {
     private readonly platform: SmartRentPlatform,
     private readonly accessory: SmartRentAccessory
   ) {
+    const device = this.accessory.context.device;
+    const initialOn = findStateByName(device.attributes, 'on');
+    const isOn = initialOn === 'true' || initialOn === true || initialOn === 1;
+
     this.state = {
-      hubId: this.accessory.context.device.room.hub_id.toString(),
-      deviceId: this.accessory.context.device.id.toString(),
+      hubId: device.room.hub_id.toString(),
+      deviceId: device.id.toString(),
       on: {
-        current: 0,
-        target: 0,
+        current: isOn ? 1 : 0,
+        target: isOn ? 1 : 0,
       },
     };
 
@@ -92,15 +96,7 @@ export class SwitchAccessory {
    */
   async handleOnGet(): Promise<CharacteristicValue> {
     this.platform.log.debug('Triggered GET On');
-    const switchAttributes =
-      await this.platform.smartRentApi.getState<SwitchData>(
-        this.state.hubId,
-        this.state.deviceId
-      );
-    const on = findStateByName(switchAttributes, 'on') as boolean;
-    const currentValue = on ? 1 : 0;
-    this.state.on.current = currentValue;
-    return currentValue;
+    return this.state.on.current;
   }
 
   /**

@@ -54,21 +54,59 @@ export class ThermostatAccessory {
     private readonly platform: SmartRentPlatform,
     private readonly accessory: SmartRentAccessory
   ) {
+    const device = this.accessory.context.device;
+    const attrs = device.attributes;
+
+    // Populate initial state from discovery data
+    const mode = (findStateByName(attrs, 'mode') as ThermostatMode) ?? 'off';
+    const operatingState =
+      (findStateByName(attrs, 'operating_state') as string) ?? 'idle';
+    const currentTemp = findStateByName(attrs, 'current_temp') as
+      | string
+      | number
+      | null;
+    const currentHumidity = findStateByName(attrs, 'current_humidity');
+    const coolingSetpoint = findStateByName(attrs, 'cooling_setpoint') as
+      | string
+      | number
+      | null;
+    const heatingSetpoint = findStateByName(attrs, 'heating_setpoint') as
+      | string
+      | number
+      | null;
+    const fanMode =
+      (findStateByName(attrs, 'fan_mode') as ThermostatFanMode) ?? 'auto';
+
+    const initialCurrentState =
+      this.toCurrentHeatingCoolingStateFromOperatingState(operatingState);
+    const initialTargetState =
+      this.toTargetHeatingCoolingStateCharacteristic(mode);
+    const initialCurrentTemp =
+      currentTemp != null
+        ? this.toTemperatureCharacteristic(currentTemp)
+        : -270;
+    const initialCoolingSetpoint =
+      coolingSetpoint != null
+        ? this.toTemperatureCharacteristic(coolingSetpoint)
+        : 10;
+    const initialHeatingSetpoint =
+      heatingSetpoint != null
+        ? this.toTemperatureCharacteristic(heatingSetpoint)
+        : 0;
+
     this.state = {
-      hubId: this.accessory.context.device.room.hub_id.toString(),
-      deviceId: this.accessory.context.device.id.toString(),
+      hubId: device.room.hub_id.toString(),
+      deviceId: device.id.toString(),
       heating_cooling_state: {
-        current:
-          this.platform.api.hap.Characteristic.CurrentHeatingCoolingState.OFF,
-        target:
-          this.platform.api.hap.Characteristic.TargetHeatingCoolingState.OFF,
+        current: initialCurrentState,
+        target: initialTargetState,
       },
       current_temperature: {
-        current: -270,
+        current: initialCurrentTemp,
       },
       target_temperature: {
-        current: 10,
-        target: 10,
+        current: initialCurrentTemp !== -270 ? initialCurrentTemp : 10,
+        target: initialCurrentTemp !== -270 ? initialCurrentTemp : 10,
       },
       temperature_display_units: {
         current:
@@ -85,19 +123,20 @@ export class ThermostatAccessory {
                 .FAHRENHEIT,
       },
       current_relative_humidity: {
-        current: 0,
+        current:
+          currentHumidity != null ? Math.round(Number(currentHumidity)) : 0,
       },
       cooling_threshold_temperature: {
-        current: 10,
-        target: 10,
+        current: initialCoolingSetpoint,
+        target: initialCoolingSetpoint,
       },
       heating_threshold_temperature: {
-        current: 0,
-        target: 0,
+        current: initialHeatingSetpoint,
+        target: initialHeatingSetpoint,
       },
       fan_on: {
-        current: 0,
-        target: 0,
+        current: this.toFanOnCharacteristic(fanMode),
+        target: this.toFanOnCharacteristic(fanMode),
       },
     };
 
@@ -493,7 +532,7 @@ export class ThermostatAccessory {
       this._stateCache.finally(() => {
         setTimeout(() => {
           this._stateCache = null;
-        }, 500);
+        }, 30000);
       });
     }
     return this._stateCache;

@@ -71,6 +71,8 @@ export type Session = {
 export class SmartRentAuthClient {
   public isTfaSession = false;
   private session?: Session;
+  private _sessionPromise: Promise<Session | undefined> | null = null;
+  private _wsTokenPromise: Promise<string | undefined> | null = null;
   private readonly storagePath: string = '~/.homebridge';
   private readonly pluginPath: string = '~/.homebridge/smartrent';
   private readonly sessionPath: string = '~/.homebridge/smartrent/session.json';
@@ -388,16 +390,30 @@ export class SmartRentAuthClient {
   }
 
   /**
-   * Get the current session if valid, a new session, or a refreshed session
+   * Get the current session if valid, a new session, or a refreshed session.
+   * Uses a promise-based mutex so concurrent callers share a single session creation.
    * @returns OAuth2 session data
    */
-  private async _getSession(credentials: ConfigCredentials) {
+  private async _getSession(
+    credentials: ConfigCredentials
+  ): Promise<Session | undefined> {
+    if (this._sessionPromise) {
+      return this._sessionPromise;
+    }
+
+    this._sessionPromise = this._getSessionInternal(credentials).finally(() => {
+      this._sessionPromise = null;
+    });
+
+    return this._sessionPromise;
+  }
+
+  private async _getSessionInternal(credentials: ConfigCredentials) {
     await this._readStoredSession();
 
     // Return the stored session if it's valid
     if (
-      !!this.session &&
-      !!this.session.expires &&
+      this.session?.expires &&
       new Date(this.session.expires) > new Date(Date.now())
     ) {
       return this.session;
@@ -420,10 +436,27 @@ export class SmartRentAuthClient {
   }
 
   /**
-   * Get the stored access token or a refreshed token if it's expired
-   * @returns OAuth2 access token
+   * Get the stored WebSocket token or fetch a new one if expired.
+   * Uses a promise-based mutex so concurrent callers share a single token fetch.
+   * @returns WebSocket token
    */
-  public async getWebSocketToken(credentials: ConfigCredentials) {
+  public async getWebSocketToken(
+    credentials: ConfigCredentials
+  ): Promise<string | undefined> {
+    if (this._wsTokenPromise) {
+      return this._wsTokenPromise;
+    }
+
+    this._wsTokenPromise = this._getWebSocketTokenInternal(credentials).finally(
+      () => {
+        this._wsTokenPromise = null;
+      }
+    );
+
+    return this._wsTokenPromise;
+  }
+
+  private async _getWebSocketTokenInternal(credentials: ConfigCredentials) {
     const session = await this._getSession(credentials);
     if (!session) {
       this.log.error('Failed to get WebSocket Token from SmartRent');

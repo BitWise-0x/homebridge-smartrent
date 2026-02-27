@@ -43,6 +43,7 @@ export class SmartRentApiClient {
   private readonly authClient: SmartRentAuthClient;
   private readonly apiClient: AxiosInstance;
   protected readonly log: Logger | Console;
+  private _cachedAccessToken: string | undefined;
 
   constructor(readonly platform: SmartRentPlatform) {
     this.authClient = new SmartRentAuthClient(
@@ -64,7 +65,10 @@ export class SmartRentApiClient {
       timeout: 10000,
     });
     apiClient.interceptors.request.use(this._handleRequest.bind(this));
-    apiClient.interceptors.response.use(this._handleResponse.bind(this));
+    apiClient.interceptors.response.use(
+      this._handleResponse.bind(this),
+      this._handleResponseError.bind(this)
+    );
     return apiClient;
   }
 
@@ -98,14 +102,16 @@ export class SmartRentApiClient {
    * @returns Axios request config
    */
   private async _handleRequest(config: InternalAxiosRequestConfig) {
-    const accessToken = await this.getAccessToken();
-    if (!accessToken) {
+    if (!this._cachedAccessToken) {
+      this._cachedAccessToken = await this.getAccessToken();
+    }
+    if (!this._cachedAccessToken) {
       this.log.error('No access token available. Aborting API request.');
       throw new Error('Authentication failed: No access token');
     }
     config.headers = {
       ...config.headers,
-      Authorization: `Bearer ${accessToken}`,
+      Authorization: `Bearer ${this._cachedAccessToken}`,
     } as AxiosRequestHeaders;
     this.log.debug(
       `API Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`
@@ -126,6 +132,16 @@ export class SmartRentApiClient {
       `API Response: ${response.status} ${response.statusText} (${dataSize} bytes)`
     );
     return response;
+  }
+
+  /**
+   * Clear cached token on 401 so the next request re-authenticates
+   */
+  private _handleResponseError(error: unknown) {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      this._cachedAccessToken = undefined;
+    }
+    return Promise.reject(error);
   }
 
   // API request methods
@@ -167,9 +183,17 @@ export class SmartRentWebsocketClient extends SmartRentApiClient {
 
   constructor(readonly platform: SmartRentPlatform) {
     super(platform);
-    this.wsClient = this._initializeWsClient();
+    this.wsClient = Promise.resolve(undefined);
     this.event = {};
     this.devices = [];
+  }
+
+  /**
+   * Connect the WebSocket client. Must be called after authentication is established.
+   */
+  public async connect(): Promise<void> {
+    this.wsClient = this._initializeWsClient();
+    await this.wsClient;
   }
 
   private _emitize(obj: object, eventName: string) {

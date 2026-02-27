@@ -14,6 +14,7 @@ export class LeakSensorAccessory {
   private readonly service: Service;
   private readonly battery: Service;
   private _batteryDataCache: Promise<LeakSensorData> | null = null;
+  private _cachedBatteryLevel: number;
 
   private readonly state: {
     hubId: string;
@@ -27,14 +28,23 @@ export class LeakSensorAccessory {
     private readonly platform: SmartRentPlatform,
     private readonly accessory: SmartRentAccessory
   ) {
+    const device = this.accessory.context.device;
+
+    // Populate initial state from discovery data
+    const initialLeak = findStateByName(device.attributes, 'leak');
+    const leakDetected = initialLeak === 'true' || initialLeak === true;
+
     this.state = {
-      hubId: this.accessory.context.device.room.hub_id.toString(),
-      deviceId: this.accessory.context.device.id.toString(),
+      hubId: device.room.hub_id.toString(),
+      deviceId: device.id.toString(),
       leak: {
-        current:
-          this.platform.api.hap.Characteristic.LeakDetected.LEAK_NOT_DETECTED,
+        current: leakDetected
+          ? this.platform.api.hap.Characteristic.LeakDetected.LEAK_DETECTED
+          : this.platform.api.hap.Characteristic.LeakDetected.LEAK_NOT_DETECTED,
       },
     };
+
+    this._cachedBatteryLevel = Math.round(Number(device.battery_level ?? 100));
 
     // set accessory information
     this.accessory
@@ -89,24 +99,7 @@ export class LeakSensorAccessory {
     this.platform.log.debug(
       `Triggered GET LeakDetected for "${this.accessory.context.device.name}" (${this.state.deviceId})`
     );
-    const leakAttributes = await this.platform.smartRentApi.getState(
-      this.state.hubId,
-      this.state.deviceId
-    );
-
-    // The API returns leak state as a string "true" or "false"
-    const leakState = findStateByName(leakAttributes, 'leak') as string;
-    const leak = leakState === 'true';
-
-    this.platform.log.debug(
-      `Leak sensor "${this.accessory.context.device.name}": state="${leakState}", leak=${leak}`
-    );
-
-    const currentValue = leak
-      ? this.platform.api.hap.Characteristic.LeakDetected.LEAK_DETECTED
-      : this.platform.api.hap.Characteristic.LeakDetected.LEAK_NOT_DETECTED;
-    this.state.leak.current = currentValue;
-    return currentValue;
+    return this.state.leak.current;
   }
 
   private _getBatteryData(): Promise<LeakSensorData> {
@@ -116,11 +109,15 @@ export class LeakSensorAccessory {
           this.state.hubId,
           this.state.deviceId
         );
-      this._batteryDataCache.finally(() => {
-        setTimeout(() => {
-          this._batteryDataCache = null;
-        }, 500);
-      });
+      this._batteryDataCache
+        .then(data => {
+          this._cachedBatteryLevel = Math.round(Number(data.battery_level));
+        })
+        .finally(() => {
+          setTimeout(() => {
+            this._batteryDataCache = null;
+          }, 30000);
+        });
     }
     return this._batteryDataCache;
   }
@@ -138,7 +135,7 @@ export class LeakSensorAccessory {
         `Failed to get battery level for "${deviceName}":`,
         error
       );
-      throw error;
+      return this._cachedBatteryLevel;
     }
   }
 
@@ -158,8 +155,12 @@ export class LeakSensorAccessory {
         `Failed to get low battery status for "${deviceName}":`,
         error
       );
-      return this.platform.api.hap.Characteristic.StatusLowBattery
-        .BATTERY_LEVEL_NORMAL;
+      const threshold = this.platform.config.lowBatteryThreshold ?? 20;
+      return this._cachedBatteryLevel <= threshold
+        ? this.platform.api.hap.Characteristic.StatusLowBattery
+            .BATTERY_LEVEL_LOW
+        : this.platform.api.hap.Characteristic.StatusLowBattery
+            .BATTERY_LEVEL_NORMAL;
     }
   }
 

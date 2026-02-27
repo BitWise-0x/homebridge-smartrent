@@ -78,6 +78,13 @@ export class SmartRentApi {
     this.websocket = new SmartRentWebsocketClient(platform);
   }
 
+  /**
+   * Connect the WebSocket client after authentication is established
+   */
+  public async connect(): Promise<void> {
+    await this.websocket.connect();
+  }
+
   public async discoverDevices() {
     const unitRecords = await this.client.get<UnitRecords>('/units');
     const unitRecordsData = unitRecords.records;

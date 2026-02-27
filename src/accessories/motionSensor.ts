@@ -19,11 +19,15 @@ export class MotionSensorAccessory {
     private readonly platform: SmartRentPlatform,
     private readonly accessory: SmartRentAccessory
   ) {
+    const device = this.accessory.context.device;
+    const initialMotion = findStateByName(device.attributes, 'motion_binary');
+    const motion = initialMotion === 'true' || initialMotion === true;
+
     this.state = {
-      hubId: this.accessory.context.device.room.hub_id.toString(),
-      deviceId: this.accessory.context.device.id.toString(),
+      hubId: device.room.hub_id.toString(),
+      deviceId: device.id.toString(),
       motion: {
-        current: false,
+        current: motion,
       },
     };
 
@@ -60,20 +64,7 @@ export class MotionSensorAccessory {
     this.platform.log.debug(
       `Triggered GET MotionDetected for "${this.accessory.context.device.name}" (${this.state.deviceId})`
     );
-    const attributes = await this.platform.smartRentApi.getState(
-      this.state.hubId,
-      this.state.deviceId
-    );
-
-    const motionState = findStateByName(attributes, 'motion_binary') as string;
-    const motion = motionState === 'true';
-
-    this.platform.log.debug(
-      `Motion sensor "${this.accessory.context.device.name}": state="${motionState}", motion=${motion}`
-    );
-
-    this.state.motion.current = motion;
-    return motion;
+    return this.state.motion.current;
   }
 
   handleDeviceStateChanged(event: WSEvent) {
