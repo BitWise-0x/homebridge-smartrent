@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.3.4](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.3.3...v1.3.4) (2026-02-28)
+
+### Bug Fixes
+
+* resolve token expiration crash and lock state stuck in HomeKit ([2aa7236](https://github.com/BitWise-0x/homebridge-smartrent/commit/2aa72364bf2740c498078774ec32f8ce45f8bd40)), closes [#56](https://github.com/BitWise-0x/homebridge-smartrent/issues/56)
+
 ## [1.3.3](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.3.2...v1.3.3) (2026-02-27)
 
 ### Bug Fixes
