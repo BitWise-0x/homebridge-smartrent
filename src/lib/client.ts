@@ -43,7 +43,6 @@ export class SmartRentApiClient {
   protected readonly authClient: SmartRentAuthClient;
   private readonly apiClient: AxiosInstance;
   protected readonly log: Logger | Console;
-  private _cachedAccessToken: string | undefined;
 
   constructor(readonly platform: SmartRentPlatform) {
     this.authClient = new SmartRentAuthClient(
@@ -102,16 +101,14 @@ export class SmartRentApiClient {
    * @returns Axios request config
    */
   private async _handleRequest(config: InternalAxiosRequestConfig) {
-    if (!this._cachedAccessToken) {
-      this._cachedAccessToken = await this.getAccessToken();
-    }
-    if (!this._cachedAccessToken) {
+    const token = await this.getAccessToken();
+    if (!token) {
       this.log.error('No access token available. Aborting API request.');
       throw new Error('Authentication failed: No access token');
     }
     config.headers = {
       ...config.headers,
-      Authorization: `Bearer ${this._cachedAccessToken}`,
+      Authorization: `Bearer ${token}`,
     } as AxiosRequestHeaders;
     this.log.debug(
       `API Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`
@@ -135,13 +132,58 @@ export class SmartRentApiClient {
   }
 
   /**
-   * Clear cached token on 401 so the next request re-authenticates
+   * On 401, clear cached token, re-authenticate, and retry once.
+   * Sanitize Authorization headers from errors to prevent token leakage in logs.
    */
-  private _handleResponseError(error: unknown) {
-    if (axios.isAxiosError(error) && error.response?.status === 401) {
-      this._cachedAccessToken = undefined;
+  private async _handleResponseError(error: unknown) {
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 401) {
+        await this.authClient.clearAccessToken();
+        const config = error.config;
+        if (
+          config &&
+          !(config as unknown as Record<string, unknown>).__retried
+        ) {
+          (config as unknown as Record<string, unknown>).__retried = true;
+          try {
+            const token = await this.getAccessToken();
+            if (token) {
+              config.headers.Authorization = `Bearer ${token}`;
+              this.log.debug(
+                'Token expired, re-authenticated and retrying request'
+              );
+              return this.apiClient.request(config);
+            }
+          } catch {
+            // Re-auth failed, fall through to reject
+          }
+        }
+      }
+      // Strip auth headers to prevent token leakage in logs
+      SmartRentApiClient._sanitizeAxiosError(error);
     }
     return Promise.reject(error);
+  }
+
+  /**
+   * Remove Authorization headers from an AxiosError to prevent token leakage
+   */
+  private static _sanitizeAxiosError(error: import('axios').AxiosError) {
+    if (error.config?.headers) {
+      delete (error.config.headers as Record<string, unknown>).Authorization;
+    }
+    if (error.response?.config?.headers) {
+      delete (error.response.config.headers as Record<string, unknown>)
+        .Authorization;
+    }
+    // Sanitize raw HTTP header string on the request object
+    const req = error.request as Record<string, unknown> | undefined;
+    if (req?._header && typeof req._header === 'string') {
+      req._header = req._header.replace(
+        /Authorization: Bearer [^\r\n]+/g,
+        'Authorization: Bearer [REDACTED]'
+      );
+    }
   }
 
   // API request methods

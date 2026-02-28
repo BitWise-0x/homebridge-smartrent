@@ -210,6 +210,16 @@ export class LockAccessory {
         attributes
       );
 
+      // Update current state to match target after successful API call
+      const currentStateValue = value
+        ? this.platform.api.hap.Characteristic.LockCurrentState.SECURED
+        : this.platform.api.hap.Characteristic.LockCurrentState.UNSECURED;
+      this.state.locked.current = currentStateValue;
+      this.service.updateCharacteristic(
+        this.platform.api.hap.Characteristic.LockCurrentState,
+        currentStateValue
+      );
+
       this.scheduleAutoLock(value);
       this.platform.log.info(
         `Successfully set "${deviceName}" to ${targetState}`

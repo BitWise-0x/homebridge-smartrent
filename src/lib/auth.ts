@@ -486,6 +486,19 @@ export class SmartRentAuthClient {
   }
 
   /**
+   * Clear cached access token so the next request triggers a fresh login.
+   * Persists to disk so retry flows don't re-read the stale token.
+   */
+  public async clearAccessToken() {
+    if (this.session) {
+      this.session.accessToken = undefined;
+      this.session.expires = undefined;
+      const sessionStr = JSON.stringify(this.session, null, 2);
+      await fsPromises.writeFile(this.sessionPath, sessionStr);
+    }
+  }
+
+  /**
    * Clear cached WebSocket token so the next connection fetches a fresh one.
    * Persists to disk so reconnect flows don't re-read the stale token.
    */
