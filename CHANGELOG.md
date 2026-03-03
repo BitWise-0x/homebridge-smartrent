@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.3.5](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.3.4...v1.3.5) (2026-03-03)
+
+### Bug Fixes
+
+* use live device mode instead of operating state for setpoint selection ([ec46486](https://github.com/BitWise-0x/homebridge-smartrent/commit/ec46486af7278ac446429129654f36c8bf9a97ef))
+
 ## [1.3.4](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.3.3...v1.3.4) (2026-02-28)
 
 ### Bug Fixes
