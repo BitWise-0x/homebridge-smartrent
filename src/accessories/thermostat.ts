@@ -662,11 +662,13 @@ export class ThermostatAccessory {
         this.fromTemperatureCharacteristic(numValue)
       );
 
-      const mode =
-        this.state.heating_cooling_state.current ===
-        this.platform.api.hap.Characteristic.TargetHeatingCoolingState.COOL
-          ? 'cooling'
-          : 'heating';
+      // Fetch the live device mode to determine which setpoint to update
+      const thermostatAttributes = await this._getState();
+      const deviceMode = findStateByName(
+        thermostatAttributes,
+        'mode'
+      ) as ThermostatMode;
+      const mode = deviceMode === 'cool' ? 'cooling' : 'heating';
 
       this.platform.log.info(
         `Setting "${deviceName}" ${mode} temperature to ${numValue}°C (${fahrenheit}°F)`
