@@ -153,6 +153,8 @@ Commits must follow [Conventional Commits](https://www.conventionalcommits.org/e
 
 If you run into issues, check the [Homebridge troubleshooting wiki](https://github.com/homebridge/homebridge/wiki/Basic-Troubleshooting) first. If the problem persists, [open an issue](https://github.com/BitWise-0x/homebridge-smartrent/issues/new/choose) with as much detail as possible.
 
+- [Homebridge SmartRent & Blink — Blog Post](https://blog.bitwisesolutions.co/blog/homebridge-smartrent-blink)
+  
 <br>
 
 ## Contributing
