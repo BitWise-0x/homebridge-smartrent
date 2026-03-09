@@ -8,7 +8,8 @@
   Homebridge SmartRent
 </h1>
 
-[![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
+[![verified-by-homebridge](https://img.shields.io/badge/homebridge-verified-blueviolet?color=%23491F59&style=for-the-badge&logoColor=%23FFFFFF&logo=homebridge)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
+
 [![npm version](https://badgen.net/npm/v/@jackietreeh0rn/homebridge-smartrent?color=purple&icon=npm&label)](https://www.npmjs.com/package/@jackietreeh0rn/homebridge-smartrent)
 [![npm downloads](https://badgen.net/npm/dw/@jackietreeh0rn/homebridge-smartrent?color=purple&icon=npm&label)](https://www.npmjs.com/package/@jackietreeh0rn/homebridge-smartrent)
 [![GitHub Stars](https://badgen.net/github/stars/BitWise-0x/homebridge-smartrent?color=cyan&icon=github)](https://github.com/BitWise-0x/homebridge-smartrent)
@@ -46,6 +47,34 @@ All devices report online/offline status via the StatusActive characteristic.
 
 <br>
 
+## Architecture
+
+```mermaid
+graph TD
+    Home["🏠 Apple Home"]
+
+    subgraph Homebridge
+        platform["<b>SmartRentPlatform</b><br>DynamicPlatformPlugin"]
+        accessories["<b>Accessories</b><br>Lock · Thermostat · Leak<br>Motion · Switch · Dimmer"]
+    end
+
+    subgraph SmartRent Cloud
+        rest["<b>REST API</b><br>control.smartrent.com/api/v3"]
+        ws["<b>WebSocket</b><br>Phoenix protocol<br>real-time state updates"]
+        auth["<b>OAuth + TOTP</b><br>authentication/sessions"]
+    end
+
+    Home <-->|"HomeKit"| accessories
+    platform --> accessories
+    platform -->|"device discovery<br>state commands"| rest
+    platform <-->|"heartbeat 30s<br>attribute events"| ws
+    platform -->|"email/password<br>+ optional 2FA"| auth
+    auth --> rest
+    auth --> ws
+```
+
+<br>
+
 ## Features
 
 - **Real-time updates** — WebSocket connection with Phoenix heartbeat for instant state changes across all devices
@@ -72,7 +101,9 @@ All devices report online/offline status via the StatusActive characteristic.
 
 3. Log in to SmartRent through the settings panel, and optionally set your unit name.
 
-![Plugin settings screenshot](homebridge-ui/public/screenshot1.png)
+<p align="center">
+  <img src="homebridge-ui/public/screenshot1.png" width="400" alt="Plugin settings screenshot" />
+</p>
 
 ### Manual
 
@@ -153,13 +184,20 @@ Commits must follow [Conventional Commits](https://www.conventionalcommits.org/e
 
 If you run into issues, check the [Homebridge troubleshooting wiki](https://github.com/homebridge/homebridge/wiki/Basic-Troubleshooting) first. If the problem persists, [open an issue](https://github.com/BitWise-0x/homebridge-smartrent/issues/new/choose) with as much detail as possible.
 
-- [Homebridge SmartRent & Blink — Blog Post](https://blog.bitwisesolutions.co/blog/homebridge-smartrent-blink)
-  
 <br>
 
 ## Contributing
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines on bug reports, feature requests, and code contributions.
+
+<br>
+
+## Useful Resources
+
+> **Read the full write-up:** [Homebridge SmartRent & Blink](https://blog.bitwisesolutions.co/blog/homebridge-smartrent-blink) — covers setup, configuration, and integration details for both plugins.
+
+- [Homebridge Developer Documentation](https://developers.homebridge.io/)
+- [Apple HomeKit Documentation](https://developer.apple.com/documentation/homekit/)
 
 <br>
 
