@@ -99,6 +99,9 @@ export class LockAccessory {
     // subscribe to the lock state change event
     this.platform.smartRentApi.websocket.event[this.state.deviceId] =
       this.handleLockEvent.bind(this);
+
+    // Start HTTP polling fallback for lock state
+    this.updateStateTask();
   }
 
   private _getBatteryData(): Promise<LockData> {
@@ -288,6 +291,8 @@ export class LockAccessory {
       event.last_read_state === 'true'
         ? this.platform.api.hap.Characteristic.LockTargetState.SECURED
         : this.platform.api.hap.Characteristic.LockTargetState.UNSECURED;
+    this.state.locked.current = currentValue;
+    this.state.locked.target = currentValue;
     this.service.updateCharacteristic(
       this.platform.api.hap.Characteristic.LockCurrentState,
       currentValue

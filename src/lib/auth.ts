@@ -322,38 +322,6 @@ export class SmartRentAuthClient {
     }
   }
 
-  // /**
-  //  * Refresh a session
-  //  * @returns OAuth2 session data
-  //  */
-  // private async _refreshSession() {
-  //   const refreshToken = this.session?.refreshToken;
-  //   if (!refreshToken) {
-  //     this.log.error('No refresh token');
-  //     return;
-  //   }
-  //   try {
-  //     const response = await this.client.post<{ data: OAuthSessionData }>(
-  //       '/tokens',
-  //       undefined,
-  //       {
-  //         headers: {
-  //           ...AUTH_CLIENT_HEADERS,
-  //           'Authorization-X-Refresh': refreshToken,
-  //         },
-  //       }
-  //     );
-  //     const sessionData = response.data.data;
-  //     return this._storeSession(sessionData, true);
-  //   } catch (error) {
-  //     this._handleResponseError(
-  //       error,
-  //       'Refresh token expired',
-  //       'refresh session'
-  //     );
-  //   }
-  // }
-
   private _handleResponseError(
     error: unknown,
     authMsg: string,

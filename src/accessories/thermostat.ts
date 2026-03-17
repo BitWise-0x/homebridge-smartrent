@@ -626,10 +626,6 @@ export class ThermostatAccessory {
     }
   }
 
-  private fromFanOnCharacteristic(on: boolean): ThermostatFanMode {
-    return on ? 'on' : 'auto';
-  }
-
   /**
    * Handle requests to get the current value of the "Target Temperature" characteristic
    */
