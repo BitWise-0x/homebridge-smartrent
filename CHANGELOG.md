@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.3.6](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.3.5...v1.3.6) (2026-03-17)
+
+### Bug Fixes
+
+* activate lock state polling and sync cached state on WebSocket events ([3df4644](https://github.com/BitWise-0x/homebridge-smartrent/commit/3df464494762149c18fbe23ac5c08eecd3176858)), closes [#59](https://github.com/BitWise-0x/homebridge-smartrent/issues/59)
+
 ## [1.3.5](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.3.4...v1.3.5) (2026-03-03)
 
 ### Bug Fixes
