@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.3.7](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.3.6...v1.3.7) (2026-03-19)
+
+### Bug Fixes
+
+* only update lock characteristics when state actually changes ([2aeb777](https://github.com/BitWise-0x/homebridge-smartrent/commit/2aeb7779cb0f8b3e134abfcc3720002120aef14d))
+
 ## [1.3.6](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.3.5...v1.3.6) (2026-03-17)
 
 ### Bug Fixes
