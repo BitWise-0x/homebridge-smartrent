@@ -291,17 +291,21 @@ export class LockAccessory {
       event.last_read_state === 'true'
         ? this.platform.api.hap.Characteristic.LockTargetState.SECURED
         : this.platform.api.hap.Characteristic.LockTargetState.UNSECURED;
+    const previousCurrent = this.state.locked.current;
     this.state.locked.current = currentValue;
     this.state.locked.target = currentValue;
-    this.service.updateCharacteristic(
-      this.platform.api.hap.Characteristic.LockCurrentState,
-      currentValue
-    );
-    this.service.updateCharacteristic(
-      this.platform.api.hap.Characteristic.LockTargetState,
-      currentValue
-    );
-    this.scheduleAutoLock(currentValue);
+
+    if (previousCurrent !== currentValue) {
+      this.service.updateCharacteristic(
+        this.platform.api.hap.Characteristic.LockCurrentState,
+        currentValue
+      );
+      this.service.updateCharacteristic(
+        this.platform.api.hap.Characteristic.LockTargetState,
+        currentValue
+      );
+      this.scheduleAutoLock(currentValue);
+    }
   }
 
   private handleNotificationEvent(event: WSEvent) {
@@ -342,17 +346,24 @@ export class LockAccessory {
         locked === 'true'
           ? this.platform.api.hap.Characteristic.LockTargetState.SECURED
           : this.platform.api.hap.Characteristic.LockTargetState.UNSECURED;
+      const previousCurrent = this.state.locked.current;
+      const previousTarget = this.state.locked.target;
       this.state.locked.current = currentValue;
       this.state.locked.target = currentValue;
-      this.service
-        .getCharacteristic(
-          this.platform.api.hap.Characteristic.LockCurrentState
-        )
-        .updateValue(this.state.locked.current);
-      this.service
-        .getCharacteristic(this.platform.api.hap.Characteristic.LockTargetState)
-        .updateValue(this.state.locked.target);
-      this.scheduleAutoLock(currentValue);
+
+      if (previousCurrent !== currentValue || previousTarget !== currentValue) {
+        this.service
+          .getCharacteristic(
+            this.platform.api.hap.Characteristic.LockCurrentState
+          )
+          .updateValue(this.state.locked.current);
+        this.service
+          .getCharacteristic(
+            this.platform.api.hap.Characteristic.LockTargetState
+          )
+          .updateValue(this.state.locked.target);
+        this.scheduleAutoLock(currentValue);
+      }
     } catch (err) {
       this.platform.log.error('Error getting lock state', err);
       this.service
