@@ -17,6 +17,7 @@ export class LockAccessory {
   private timerSet: boolean = false;
   private _batteryDataCache: Promise<LockData> | null = null;
   private _cachedBatteryLevel: number;
+  private _lastWsUpdate: number = 0;
 
   private readonly state: {
     hubId: string;
@@ -295,6 +296,8 @@ export class LockAccessory {
     this.state.locked.current = currentValue;
     this.state.locked.target = currentValue;
 
+    this._lastWsUpdate = Date.now();
+
     if (previousCurrent !== currentValue) {
       this.service.updateCharacteristic(
         this.platform.api.hap.Characteristic.LockCurrentState,
@@ -341,28 +344,42 @@ export class LockAccessory {
           this.state.deviceId
         );
       this.platform.log.debug('lockAttributes', lockAttributes);
-      const locked = findStateByName(lockAttributes, this.LOCKED);
-      const currentValue =
-        locked === 'true'
-          ? this.platform.api.hap.Characteristic.LockTargetState.SECURED
-          : this.platform.api.hap.Characteristic.LockTargetState.UNSECURED;
-      const previousCurrent = this.state.locked.current;
-      const previousTarget = this.state.locked.target;
-      this.state.locked.current = currentValue;
-      this.state.locked.target = currentValue;
 
-      if (previousCurrent !== currentValue || previousTarget !== currentValue) {
-        this.service
-          .getCharacteristic(
-            this.platform.api.hap.Characteristic.LockCurrentState
-          )
-          .updateValue(this.state.locked.current);
-        this.service
-          .getCharacteristic(
-            this.platform.api.hap.Characteristic.LockTargetState
-          )
-          .updateValue(this.state.locked.target);
-        this.scheduleAutoLock(currentValue);
+      // Skip polling update if a WebSocket event arrived recently (within 30s).
+      // The WS event is authoritative and the HTTP API may lag behind it,
+      // causing stale data to trigger spurious HomeKit notifications.
+      const WS_COOLDOWN_MS = 30_000;
+      if (Date.now() - this._lastWsUpdate < WS_COOLDOWN_MS) {
+        this.platform.log.debug(
+          'Skipping poll update — recent WebSocket event is authoritative'
+        );
+      } else {
+        const locked = findStateByName(lockAttributes, this.LOCKED);
+        const currentValue =
+          locked === 'true'
+            ? this.platform.api.hap.Characteristic.LockTargetState.SECURED
+            : this.platform.api.hap.Characteristic.LockTargetState.UNSECURED;
+        const previousCurrent = this.state.locked.current;
+        const previousTarget = this.state.locked.target;
+        this.state.locked.current = currentValue;
+        this.state.locked.target = currentValue;
+
+        if (
+          previousCurrent !== currentValue ||
+          previousTarget !== currentValue
+        ) {
+          this.service
+            .getCharacteristic(
+              this.platform.api.hap.Characteristic.LockCurrentState
+            )
+            .updateValue(this.state.locked.current);
+          this.service
+            .getCharacteristic(
+              this.platform.api.hap.Characteristic.LockTargetState
+            )
+            .updateValue(this.state.locked.target);
+          this.scheduleAutoLock(currentValue);
+        }
       }
     } catch (err) {
       this.platform.log.error('Error getting lock state', err);
