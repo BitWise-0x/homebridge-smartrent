@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.3.9](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.3.8...v1.3.9) (2026-03-29)
+
+### Bug Fixes
+
+* remove lock HTTP polling in favor of WebSocket-only state updates ([1bd52e0](https://github.com/BitWise-0x/homebridge-smartrent/commit/1bd52e00386e1f6401155a7e0e45efc1dd46a74f))
+
 ## [1.3.8](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.3.7...v1.3.8) (2026-03-20)
 
 ### Bug Fixes
