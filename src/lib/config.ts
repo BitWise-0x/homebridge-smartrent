@@ -16,7 +16,7 @@ export interface SmartRentPlatformConfig extends PlatformConfig {
   autoLockDelayInMinutes?: number;
   excludeDevices?: number[];
   lowBatteryThreshold?: number;
-  lockPollingInterval?: number;
+
   temperatureUnit?: 'fahrenheit' | 'celsius';
   verboseLogging?: boolean;
 }

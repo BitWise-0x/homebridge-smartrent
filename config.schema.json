@@ -100,14 +100,6 @@
         "maximum": 50,
         "description": "Battery percentage at or below which devices report low battery status."
       },
-      "lockPollingInterval": {
-        "title": "Lock polling interval (seconds)",
-        "type": "integer",
-        "default": 10,
-        "minimum": 5,
-        "maximum": 300,
-        "description": "How often to poll the lock state via the SmartRent API, in seconds."
-      },
       "temperatureUnit": {
         "title": "Temperature display unit",
         "type": "string",
