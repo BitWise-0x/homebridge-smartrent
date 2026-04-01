@@ -10,12 +10,12 @@
 
 [![verified-by-homebridge](https://img.shields.io/badge/homebridge-verified-blueviolet?color=%23491F59&style=for-the-badge&logoColor=%23FFFFFF&logo=homebridge)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
 
-[![npm version](https://badgen.net/npm/v/@jackietreeh0rn/homebridge-smartrent?color=purple&icon=npm&label)](https://www.npmjs.com/package/@jackietreeh0rn/homebridge-smartrent)
-[![npm downloads](https://badgen.net/npm/dw/@jackietreeh0rn/homebridge-smartrent?color=purple&icon=npm&label)](https://www.npmjs.com/package/@jackietreeh0rn/homebridge-smartrent)
-[![GitHub Stars](https://badgen.net/github/stars/BitWise-0x/homebridge-smartrent?color=cyan&icon=github)](https://github.com/BitWise-0x/homebridge-smartrent)
-[![GitHub Last Commit](https://badgen.net/github/last-commit/BitWise-0x/homebridge-smartrent?color=cyan&icon=github)](https://github.com/BitWise-0x/homebridge-smartrent)
-[![GitHub pull requests](https://img.shields.io/github/issues-pr/BitWise-0x/homebridge-smartrent.svg)](https://github.com/BitWise-0x/homebridge-smartrent/pulls)
-[![GitHub issues](https://img.shields.io/github/issues/BitWise-0x/homebridge-smartrent.svg)](https://github.com/BitWise-0x/homebridge-smartrent/issues)
+[![npm version](https://img.shields.io/npm/v/@jackietreeh0rn/homebridge-smartrent?color=purple&logo=npm&label=&cacheSeconds=300)](https://www.npmjs.com/package/@jackietreeh0rn/homebridge-smartrent)
+[![npm downloads](https://img.shields.io/npm/dw/@jackietreeh0rn/homebridge-smartrent?color=purple&logo=npm&label=&cacheSeconds=300)](https://www.npmjs.com/package/@jackietreeh0rn/homebridge-smartrent)
+[![GitHub Stars](https://img.shields.io/github/stars/BitWise-0x/homebridge-smartrent?color=cyan&logo=github&cacheSeconds=300)](https://github.com/BitWise-0x/homebridge-smartrent)
+[![GitHub Last Commit](https://img.shields.io/github/last-commit/BitWise-0x/homebridge-smartrent?color=cyan&logo=github&cacheSeconds=300)](https://github.com/BitWise-0x/homebridge-smartrent)
+[![GitHub pull requests](https://img.shields.io/github/issues-pr/BitWise-0x/homebridge-smartrent?cacheSeconds=300)](https://github.com/BitWise-0x/homebridge-smartrent/pulls)
+[![GitHub issues](https://img.shields.io/github/issues/BitWise-0x/homebridge-smartrent?cacheSeconds=300)](https://github.com/BitWise-0x/homebridge-smartrent/issues)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FBitWise-0x%2Fhomebridge-smartrent.svg?type=shield&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2FBitWise-0x%2Fhomebridge-smartrent?ref=badge_shield&issueType=license)
 
 <!-- [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FBitWise-0x%2Fhomebridge-smartrent.svg?type=shield&issueType=security)](https://app.fossa.com/projects/git%2Bgithub.com%2FBitWise-0x%2Fhomebridge-smartrent?ref=badge_shield&issueType=security) -->
