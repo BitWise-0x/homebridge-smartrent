@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { SmartRentPlatform } from '../platform.js';
 import { SmartRentApiClient, SmartRentWebsocketClient } from './client.js';
 import {
@@ -5,6 +6,23 @@ import {
   DeviceAttribute,
   DeviceDataUnion,
 } from '../devices/index.js';
+
+// Network-level error codes that indicate the request never reached the
+// server (or the response never came back). Safe to retry writes on these.
+const TRANSIENT_NETWORK_CODES = new Set([
+  'ECONNABORTED',
+  'ETIMEDOUT',
+  'ECONNRESET',
+  'EPIPE',
+  'EAI_AGAIN',
+]);
+
+function isTransientNetworkError(err: unknown): boolean {
+  if (!axios.isAxiosError(err)) return false;
+  // A response means the server acted on the request — never retry.
+  if (err.response) return false;
+  return !!err.code && TRANSIENT_NETWORK_CODES.has(err.code);
+}
 
 type UnitData = {
   building: string;
@@ -161,10 +179,25 @@ export class SmartRentApi {
       }
       return attribute;
     });
-    const device = await this.client.patch<Device>(
-      `/hubs/${hubId}/devices/${deviceId}`,
-      { attributes: normalizedAttributes }
-    );
+    const path = `/hubs/${hubId}/devices/${deviceId}`;
+    const body = { attributes: normalizedAttributes };
+    let device: Device;
+    try {
+      device = await this.client.patch<Device>(path, body);
+    } catch (err) {
+      if (!isTransientNetworkError(err)) throw err;
+      this.platform.log.warn(
+        `setState: transient network error on PATCH ${path}, retrying once on a fresh socket`
+      );
+      await new Promise(resolve => setTimeout(resolve, 250));
+      // Force a fresh TCP+TLS connection for the retry. SmartRent's API
+      // occasionally hangs on a keep-alive socket that was just used for a
+      // GET; Connection: close bypasses the pool so the retry opens a new one.
+      device = await this.client.patch<Device>(path, body, {
+        headers: { Connection: 'close' },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any);
+    }
     return device.attributes;
   }
 }

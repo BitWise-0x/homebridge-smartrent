@@ -62,6 +62,7 @@ export class SmartRentApiClient {
       baseURL: API_URL,
       headers: API_CLIENT_HEADERS,
       timeout: 10000,
+      transitional: { clarifyTimeoutError: true },
     });
     apiClient.interceptors.request.use(this._handleRequest.bind(this));
     apiClient.interceptors.response.use(
