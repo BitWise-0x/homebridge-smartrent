@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.3.10](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.3.9...v1.3.10) (2026-04-08)
+
+### Bug Fixes
+
+* **thermostat:** retry write on stale keep-alive socket ([c89d109](https://github.com/BitWise-0x/homebridge-smartrent/commit/c89d109afae4835aa1542b4a27d9d209f388bb89))
+
 ## [1.3.9](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.3.8...v1.3.9) (2026-03-29)
 
 ### Bug Fixes
