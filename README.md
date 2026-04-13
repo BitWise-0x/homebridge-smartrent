@@ -125,20 +125,24 @@ graph TD
 
 ## Configuration
 
-| Property                  | Type    | Default    | Description                                                                                          |
-| ------------------------- | ------- | ---------- | ---------------------------------------------------------------------------------------------------- |
-| `email`                   | string  | _required_ | SmartRent account email                                                                              |
-| `password`                | string  | _required_ | SmartRent account password                                                                           |
-| `tfaSecret`               | string  |            | 32-character TOTP seed for two-factor authentication                                                 |
-| `unitName`                | string  |            | Unit name — only needed if you have multiple units. Find it in the SmartRent app under the More tab. |
-| `enableLocks`             | boolean | `true`     | Enable lock accessories                                                                              |
-| `enableThermostats`       | boolean | `true`     | Enable thermostat accessories                                                                        |
-| `enableLeakSensors`       | boolean | `true`     | Enable leak sensor accessories                                                                       |
-| `enableMotionSensors`     | boolean | `true`     | Enable motion sensor accessories                                                                     |
-| `enableSwitches`          | boolean | `true`     | Enable switch accessories                                                                            |
-| `enableSwitchMultiLevels` | boolean | `true`     | Enable dimmer/multilevel switch accessories                                                          |
-| `enableAutoLock`          | boolean | `false`    | Automatically re-lock after unlocking                                                                |
-| `autoLockDelayInMinutes`  | integer | `5`        | Minutes to wait before auto-locking                                                                  |
+| Property                  | Type    | Default      | Description                                                                                          |
+| ------------------------- | ------- | ------------ | ---------------------------------------------------------------------------------------------------- |
+| `email`                   | string  | _required_   | SmartRent account email                                                                              |
+| `password`                | string  | _required_   | SmartRent account password                                                                           |
+| `tfaSecret`               | string  |              | 32-character TOTP seed for two-factor authentication                                                 |
+| `unitName`                | string  |              | Unit name — only needed if you have multiple units. Find it in the SmartRent app under the More tab. |
+| `enableLocks`             | boolean | `true`       | Enable lock accessories                                                                              |
+| `enableThermostats`       | boolean | `true`       | Enable thermostat accessories                                                                        |
+| `enableLeakSensors`       | boolean | `true`       | Enable leak sensor accessories                                                                       |
+| `enableMotionSensors`     | boolean | `true`       | Enable motion sensor accessories                                                                     |
+| `enableSwitches`          | boolean | `true`       | Enable switch accessories                                                                            |
+| `enableSwitchMultiLevels` | boolean | `true`       | Enable dimmer/multilevel switch accessories                                                          |
+| `enableAutoLock`          | boolean | `false`      | Automatically re-lock after unlocking                                                                |
+| `autoLockDelayInMinutes`  | integer | `5`          | Minutes to wait before auto-locking                                                                  |
+| `excludeDevices`          | array   |              | List of SmartRent device IDs to exclude from HomeKit. Device IDs are shown in logs at startup.       |
+| `lowBatteryThreshold`     | integer | `20`         | Battery percentage at or below which devices report low battery status (5–50)                        |
+| `temperatureUnit`         | string  | `fahrenheit` | Temperature display unit for thermostats (`fahrenheit` or `celsius`)                                 |
+| `verboseLogging`          | boolean | `false`      | Enable verbose debug logging for troubleshooting                                                     |
 
 <br>
 
