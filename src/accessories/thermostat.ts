@@ -225,6 +225,13 @@ export class ThermostatAccessory {
       this.platform.api.hap.Characteristic.Name,
       accessory.context.device.name
     );
+    this.fanService.addOptionalCharacteristic(
+      this.platform.api.hap.Characteristic.ConfiguredName
+    );
+    this.fanService.setCharacteristic(
+      this.platform.api.hap.Characteristic.ConfiguredName,
+      `${accessory.context.device.name} Fan`
+    );
 
     // create handlers for required characteristics
     this.fanService
