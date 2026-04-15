@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.0](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.3.10...v1.4.0) (2026-04-15)
+
+### Features
+
+* **accessories:** set ConfiguredName on secondary services for HomeKit pairing ([08ae579](https://github.com/BitWise-0x/homebridge-smartrent/commit/08ae5791809f30d8be0579354a3f290633a93ad5))
+
 ## [1.3.10](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.3.9...v1.3.10) (2026-04-08)
 
 ### Bug Fixes
