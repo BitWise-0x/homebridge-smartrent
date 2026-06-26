@@ -63,7 +63,10 @@
   },
   "overrides": {
     "fastify": "^5.8.5",
-    "npm": "^11.16.0"
+    "npm": "^11.16.0",
+    "tar": "^7.5.17",
+    "js-yaml": "^4.2.0",
+    "undici": "^7.28.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.6.1",
