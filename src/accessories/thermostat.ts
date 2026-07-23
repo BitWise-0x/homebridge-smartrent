@@ -532,15 +532,27 @@ export class ThermostatAccessory {
 
   private _getState(): Promise<DeviceAttribute[]> {
     if (!this._stateCache) {
-      this._stateCache = this.platform.smartRentApi.getState(
+      const request = this.platform.smartRentApi.getState(
         this.state.hubId,
         this.state.deviceId
       );
-      this._stateCache.finally(() => {
-        setTimeout(() => {
-          this._stateCache = null;
-        }, 30000);
-      });
+      this._stateCache = request;
+      // Attach a handler so a failed request never surfaces as an unhandled
+      // rejection; callers still receive the error via the returned promise.
+      request.then(
+        () => {
+          const timer = setTimeout(() => {
+            this._stateCache = null;
+          }, 30000);
+          timer.unref?.();
+        },
+        () => {
+          // Don't cache failures, otherwise every read for the next 30s fails.
+          if (this._stateCache === request) {
+            this._stateCache = null;
+          }
+        }
+      );
     }
     return this._stateCache;
   }
