@@ -14,12 +14,35 @@ import { SmartRentApi } from './lib/api.js';
 import { DeviceDataUnion } from './devices/index.js';
 import { SmartRentPlatformConfig } from './lib/config.js';
 
+/** How often to look for devices added or removed in the SmartRent app. */
+const DISCOVERY_INTERVAL_MS = 15 * 60 * 1000;
+
+type AccessoryConstructor =
+  | typeof LeakSensorAccessory
+  | typeof LockAccessory
+  | typeof MotionSensorAccessory
+  | typeof SwitchAccessory
+  | typeof ThermostatAccessory
+  | typeof SwitchMultilevelAccessory;
+
 /**
  * SmartRentPlatform
  */
 export class SmartRentPlatform implements DynamicPlatformPlugin {
   public readonly smartRentApi: SmartRentApi;
   public accessories: SmartRentAccessory[] = [];
+
+  private _discoveryTimer?: ReturnType<typeof setInterval>;
+  private _discoveryChain?: Promise<void>;
+  // Accessories whose handler has been attached, so repeated discovery
+  // passes never build a second handler for the same accessory.
+  private readonly _handledUUIDs = new Set<string>();
+  // Accessory handlers by UUID, so resources they own (the lock auto-relock
+  // timer in particular) can be released when a device is removed.
+  private readonly _handlers = new Map<string, { dispose?: () => void }>();
+  // Unsupported device types already reported, so the warning fires once per
+  // type rather than on every discovery pass.
+  private readonly _reportedUnknownTypes = new Set<string>();
 
   private readonly ALLOWED_DEVICE_TYPES: Set<string> = new Set([
     'sensor_notification',
@@ -54,13 +77,15 @@ export class SmartRentPlatform implements DynamicPlatformPlugin {
               wsError
             );
           }
-          await this.discoverDevices();
+          await this.startDeviceDiscovery();
         }
       } catch (error) {
         log.error('Failed to initialize SmartRent platform:', error);
       }
       log.debug('Executed didFinishLaunching callback');
     });
+
+    this.api.on('shutdown', () => this.stopDeviceDiscovery());
   }
 
   configureAccessory(accessory: SmartRentAccessory): void {
@@ -77,17 +102,22 @@ export class SmartRentPlatform implements DynamicPlatformPlugin {
   ) {
     // create the accessory handler for the restored accessory
     // this is imported from `platformAccessory.ts`
-    let Accessory:
-      | typeof LeakSensorAccessory
-      | typeof LockAccessory
-      | typeof MotionSensorAccessory
-      | typeof SwitchAccessory
-      | typeof ThermostatAccessory
-      | typeof SwitchMultilevelAccessory;
+    let Accessory: AccessoryConstructor;
 
     const type = device.type;
     if (!this.ALLOWED_DEVICE_TYPES.has(type)) {
-      this.log.error(`Unknown device type: ${device.type}`);
+      // SmartRent adds hardware categories over time. This is not an error in
+      // the user's setup, and repeating it on every discovery pass would be
+      // noise, so report each unknown type once with a way to get it added.
+      if (!this._reportedUnknownTypes.has(type)) {
+        this._reportedUnknownTypes.add(type);
+        this.log.warn(
+          `Device "${device.name}" reports an unsupported type "${type}" and ` +
+            'was not added to HomeKit. Please report this type so support ' +
+            'can be added: ' +
+            'https://github.com/BitWise-0x/homebridge-smartrent/issues'
+        );
+      }
       return;
     }
     const attributeNames = device.attributes.map(attr => {
@@ -125,7 +155,7 @@ export class SmartRentPlatform implements DynamicPlatformPlugin {
     let accessoryExists = true;
     if (accessory) {
       // the accessory already exists
-      this.log.info(
+      this.log.debug(
         'Restoring existing accessory from cache:',
         accessory.displayName
       );
@@ -145,9 +175,17 @@ export class SmartRentPlatform implements DynamicPlatformPlugin {
       accessory.context.device = device;
     }
 
-    // create the accessory handler for the newly create accessory
-    // this is imported from `platformAccessory.ts`
-    new Accessory(this, accessory); //NOSONAR
+    // Attach the accessory handler exactly once. It registers HAP
+    // characteristic handlers and subscribes to WebSocket device events
+    // through an accumulating subscriber set, so building it again on a
+    // later discovery pass would handle every event twice over.
+    if (!this._handledUUIDs.has(uuid)) {
+      this._handledUUIDs.add(uuid);
+      const handler = this._buildAccessory(Accessory, accessory);
+      if (handler) {
+        this._handlers.set(uuid, handler);
+      }
+    }
 
     if (!accessoryExists) {
       this.accessories.push(accessory);
@@ -159,12 +197,83 @@ export class SmartRentPlatform implements DynamicPlatformPlugin {
   }
 
   /**
-   * This is an example method showing how to register discovered accessories.
-   * Accessories must only be registered once, previously created accessories
-   * must not be registered again to prevent "duplicate UUID" errors.
+   * Attach the accessory handler. Isolated so the discovery/reconcile logic
+   * can be tested without a full HAP implementation.
    */
+  protected _buildAccessory(
+    Accessory: AccessoryConstructor,
+    accessory: SmartRentAccessory
+  ): { dispose?: () => void } | undefined {
+    return new Accessory(this, accessory) as { dispose?: () => void }; //NOSONAR
+  }
+
+  /**
+   * Begin periodic device discovery. Devices added or removed in the
+   * SmartRent app are picked up on the next pass rather than waiting for a
+   * Homebridge restart.
+   */
+  async startDeviceDiscovery(): Promise<void> {
+    // Clear first: a second call must not leave the previous interval
+    // running untracked.
+    this.stopDeviceDiscovery();
+    await this.discoverDevices();
+    this._discoveryTimer = setInterval(() => {
+      this.discoverDevices().catch(error =>
+        this.log.warn('Device rediscovery failed:', error)
+      );
+    }, DISCOVERY_INTERVAL_MS);
+    // Don't hold the event loop open on shutdown.
+    this._discoveryTimer.unref?.();
+  }
+
+  stopDeviceDiscovery(): void {
+    if (this._discoveryTimer) {
+      clearInterval(this._discoveryTimer);
+      this._discoveryTimer = undefined;
+    }
+  }
+
   async discoverDevices() {
-    const allDevices = await this.smartRentApi.discoverDevices();
+    // A slow pass would reconcile against the device list it fetched before
+    // a newer pass ran, unregistering anything the newer pass added. Run one
+    // at a time, and chain onto the in-flight pass so a caller still sees a
+    // complete, up-to-date discovery rather than a silently dropped one.
+    const run = (this._discoveryChain ?? Promise.resolve())
+      .catch(() => undefined)
+      .then(() => this._discoverDevices());
+    this._discoveryChain = run;
+    try {
+      await run;
+    } finally {
+      if (this._discoveryChain === run) {
+        this._discoveryChain = undefined;
+      }
+    }
+  }
+
+  private async _discoverDevices() {
+    let allDevices: DeviceDataUnion[];
+    try {
+      allDevices = await this.smartRentApi.discoverDevices();
+    } catch (error) {
+      // A failed request is not evidence that the account has no devices;
+      // treating it as such would unregister every accessory the user has.
+      this.log.warn('Device discovery failed, keeping known devices:', error);
+      return;
+    }
+
+    // Likewise an empty result. discoverDevices() returns [] for a missing
+    // unit or hub, which is a transient/config condition rather than a real
+    // "all devices deleted" event.
+    if (allDevices.length === 0) {
+      if (this.accessories.length > 0) {
+        this.log.warn(
+          'Device discovery returned no devices; keeping existing accessories'
+        );
+      }
+      return;
+    }
+
     const excludeIds = new Set(this.config.excludeDevices ?? []);
     const devices = allDevices.filter(device => {
       if (excludeIds.has(device.id)) {
@@ -190,8 +299,9 @@ export class SmartRentPlatform implements DynamicPlatformPlugin {
     });
 
     // remove platform accessories when no longer present
+    const activeUUIDs = new Set(uuids);
     this.accessories = this.accessories.filter(existingAccessory => {
-      if (!uuids.includes(existingAccessory.UUID)) {
+      if (!activeUUIDs.has(existingAccessory.UUID)) {
         this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [
           existingAccessory,
         ]);
@@ -199,6 +309,14 @@ export class SmartRentPlatform implements DynamicPlatformPlugin {
           'Removing existing accessory from cache:',
           existingAccessory.displayName
         );
+        // Release anything the handler owns (the auto-relock timer would
+        // otherwise still fire against a removed door).
+        this._handlers.get(existingAccessory.UUID)?.dispose?.();
+        // Deliberately NOT removed from _handledUUIDs. There is no way to
+        // unsubscribe a handler (websocket.event[id] = fn appends to an
+        // accumulating set), so a device that flaps out of the API response
+        // and back would get a second handler and fire every event twice.
+        // The original handler is still attached and still correct.
         return false;
       }
       return true;

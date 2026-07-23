@@ -1,3 +1,4 @@
+import { inspect } from 'node:util';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 
 // Mock all external dependencies before imports
@@ -164,10 +165,149 @@ describe('SmartRentApiClient', () => {
 
       await expect(responseErrorHandler(error)).rejects.toBe(error);
 
-      expect(error.config.headers.Authorization).toBeUndefined();
-      expect(error.response.config.headers.Authorization).toBeUndefined();
+      // Redacted rather than deleted: `delete` throws on frozen or sealed
+      // header objects, and this runs outside any try/catch.
+      expect(error.config.headers.Authorization).toBe('[REDACTED]');
+      expect(error.response.config.headers.Authorization).toBe('[REDACTED]');
       expect(error.request._header).toContain('[REDACTED]');
       expect(error.request._header).not.toContain('secret-token');
+    });
+
+    it('strips the token from a follow-redirects request shape', async () => {
+      new SmartRentApiClient(platform);
+
+      const responseErrorHandler = mockAxiosInstance.interceptors.response.use
+        .mock.calls[0][1] as (error: unknown) => Promise<unknown>;
+
+      // A real timed-out request is a follow-redirects Writable: the raw header
+      // sits on _currentRequest and the resolved options keep their own copy.
+      const rawHeader =
+        'GET /api HTTP/1.1\r\nAuthorization: Bearer secret-token\r\nHost: example.com\r\n\r\n';
+      const error = {
+        isAxiosError: true,
+        code: 'ETIMEDOUT',
+        config: { headers: { Authorization: 'Bearer secret-token' } },
+        request: {
+          _options: { headers: { Authorization: 'Bearer secret-token' } },
+          _currentRequest: { _header: rawHeader },
+        },
+      };
+
+      await expect(responseErrorHandler(error)).rejects.toBe(error);
+
+      expect(error.config.headers.Authorization).toBe('[REDACTED]');
+      expect(error.request._options.headers.Authorization).toBe('[REDACTED]');
+      expect(error.request._currentRequest._header).toContain('[REDACTED]');
+      expect(JSON.stringify(error)).not.toContain('secret-token');
+    });
+
+    // Scrubbing must never replace the real error. `delete` (and assignment)
+    // on a frozen or sealed object throws in strict mode, and the sanitizer
+    // runs outside any try/catch in the response interceptor.
+    it('does not throw when the headers object is frozen', async () => {
+      new SmartRentApiClient(platform);
+
+      const responseErrorHandler = mockAxiosInstance.interceptors.response.use
+        .mock.calls[0][1] as (error: unknown) => Promise<unknown>;
+
+      const error = {
+        isAxiosError: true,
+        code: 'ECONNRESET',
+        config: { headers: Object.freeze({ Authorization: 'Bearer secret' }) },
+      };
+
+      await expect(responseErrorHandler(error)).rejects.toBe(error);
+    });
+
+    it('does not throw when the headers object is sealed', async () => {
+      new SmartRentApiClient(platform);
+
+      const responseErrorHandler = mockAxiosInstance.interceptors.response.use
+        .mock.calls[0][1] as (error: unknown) => Promise<unknown>;
+
+      const error = {
+        isAxiosError: true,
+        code: 'ECONNRESET',
+        config: { headers: Object.seal({ Authorization: 'Bearer secret' }) },
+      };
+
+      await expect(responseErrorHandler(error)).rejects.toBe(error);
+    });
+
+    // The same object can be reached from more than one root. Marking it seen
+    // at a deep offset must not stop a later, shallower walk from scrubbing
+    // the children the depth budget previously cut off.
+    it('scrubs a shared object reached deeply first and shallowly later', async () => {
+      new SmartRentApiClient(platform);
+
+      const responseErrorHandler = mockAxiosInstance.interceptors.response.use
+        .mock.calls[0][1] as (error: unknown) => Promise<unknown>;
+
+      const shared = { headers: { Authorization: 'Bearer secret-token' } };
+      const error = {
+        isAxiosError: true,
+        // Reached at depth 6 from config, where the budget cuts its children.
+        config: { a: { b: { c: { d: { e: { f: shared } } } } } },
+        // Reached at depth 0 from request, where it must be fully scrubbed.
+        request: shared,
+      };
+
+      await expect(responseErrorHandler(error)).rejects.toBe(error);
+
+      expect(inspect(error, { depth: null })).not.toContain('secret-token');
+    });
+
+    // Tokens are not always under a key named Authorization.
+    it('redacts a bearer token carried in a url or query string', async () => {
+      new SmartRentApiClient(platform);
+
+      const responseErrorHandler = mockAxiosInstance.interceptors.response.use
+        .mock.calls[0][1] as (error: unknown) => Promise<unknown>;
+
+      const error = {
+        isAxiosError: true,
+        config: {
+          url: 'https://example.com/ws?token=Bearer%20secret-token',
+          params: { access_token: 'Bearer secret-token' },
+        },
+      };
+
+      await expect(responseErrorHandler(error)).rejects.toBe(error);
+
+      expect(inspect(error, { depth: null })).not.toContain('secret-token');
+    });
+
+    it('strips the token from the symbol-keyed outgoing header map', async () => {
+      new SmartRentApiClient(platform);
+
+      const responseErrorHandler = mockAxiosInstance.interceptors.response.use
+        .mock.calls[0][1] as (error: unknown) => Promise<unknown>;
+
+      // Node keeps the outgoing headers under Symbol(kOutHeaders) as
+      // [originalName, value] pairs, which util.inspect prints on an
+      // unhandled rejection even though Object.keys never sees them.
+      const kOutHeaders = Symbol('kOutHeaders');
+      const currentRequest: Record<PropertyKey, unknown> = {
+        [kOutHeaders]: {
+          accept: ['Accept', 'application/json'],
+          authorization: ['Authorization', 'Bearer secret-token'],
+        },
+      };
+      const error = {
+        isAxiosError: true,
+        code: 'ETIMEDOUT',
+        request: { _currentRequest: currentRequest },
+      };
+
+      await expect(responseErrorHandler(error)).rejects.toBe(error);
+
+      const outHeaders = currentRequest[kOutHeaders] as Record<
+        string,
+        string[]
+      >;
+      expect(outHeaders.authorization[1]).toBe('Bearer [REDACTED]');
+      expect(outHeaders.accept[1]).toBe('application/json');
+      expect(inspect(error, { depth: null })).not.toContain('secret-token');
     });
   });
 

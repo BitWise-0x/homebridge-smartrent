@@ -240,6 +240,19 @@ export class LockAccessory {
     }
   }
 
+  /**
+   * Cancel the pending auto-lock. Called when the accessory is removed from
+   * HomeKit: otherwise the timer still fires and locks a physical door the
+   * user has just removed, then writes to a detached service.
+   */
+  dispose(): void {
+    if (this.timer) {
+      clearTimeout(this.timer);
+      this.timer = undefined;
+      this.timerSet = false;
+    }
+  }
+
   private scheduleAutoLock(value: CharacteristicValue) {
     if (
       value ===
