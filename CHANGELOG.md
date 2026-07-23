@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.1](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.4.0...v1.4.1) (2026-07-23)
+
+### Bug Fixes
+
+* **thermostat:** prevent unhandled rejection crashing child bridge on state fetch failure ([0e9d459](https://github.com/BitWise-0x/homebridge-smartrent/commit/0e9d45999adf7bd51a616409c08c2b5e4199cd75))
+
 ## [1.4.0](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.3.10...v1.4.0) (2026-04-15)
 
 ### Features
