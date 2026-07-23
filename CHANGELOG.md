@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.2](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.4.1...v1.4.2) (2026-07-23)
+
+### Bug Fixes
+
+* **platform:** rediscover devices periodically and harden token sanitization ([f6d2a56](https://github.com/BitWise-0x/homebridge-smartrent/commit/f6d2a56e057d1113f8ea7c763986326b61b541cd))
+
 ## [1.4.1](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.4.0...v1.4.1) (2026-07-23)
 
 ### Bug Fixes
