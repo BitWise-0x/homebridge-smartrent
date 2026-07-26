@@ -68,7 +68,9 @@
     "js-yaml": "^4.3.0",
     "undici": "^7.28.0",
     "find-my-way": "^9.7.0",
-    "brace-expansion": "^1.1.16 || ^2.0.2 || ^5.0.7"
+    "brace-expansion": "^1.1.16 || ^2.0.2 || ^5.0.7",
+    "@fastify/static": "^10.1.2",
+    "postcss": "^8.5.23"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.6.1",
