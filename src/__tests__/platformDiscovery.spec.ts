@@ -57,9 +57,11 @@ function makeApi(): {
       this.displayName = displayName;
       this.UUID = uuid;
     }
+
     getService() {
       return undefined;
     }
+
     addService() {
       return {
         setCharacteristic() {
