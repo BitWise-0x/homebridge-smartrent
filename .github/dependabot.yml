@@ -26,7 +26,17 @@ updates:
         update-types:
           - 'minor'
           - 'patch'
+        # prettier minors change formatting output, which fails prettier --check
+        # and wedges the whole group. It gets its own PR instead.
+        exclude-patterns:
+          - 'prettier'
       development-dependencies-major-updates:
         dependency-type: 'development'
         update-types:
           - 'major'
+    ignore:
+      # @typescript-eslint peers cap at typescript <6.1.0, so a major bump to 7
+      # fails npm ci for the whole group. Drop this once their peer range moves.
+      - dependency-name: 'typescript'
+        update-types:
+          - 'version-update:semver-major'
