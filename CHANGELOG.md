@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.0.0](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.4.3...v2.0.0) (2026-09-04)
+
+### ⚠ BREAKING CHANGES
+
+* **auth:** Node.js 18 is no longer supported. Node.js 20.19.0 or
+newer is required.
+
+### Bug Fixes
+
+* **auth:** migrate to otplib 13 ([53a9835](https://github.com/BitWise-0x/homebridge-smartrent/commit/53a98354d94e9b30dc21ef9a4d0041e281f0bf89))
+* **release:** pin conventional-changelog preset to v9 ([76cae33](https://github.com/BitWise-0x/homebridge-smartrent/commit/76cae33dad1ea05343061fcc1e3bbf3870b26a07))
+
 ## [1.4.3](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.4.2...v1.4.3) (2026-09-04)
 
 ### Bug Fixes
