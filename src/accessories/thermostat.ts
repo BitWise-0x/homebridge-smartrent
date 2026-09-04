@@ -62,18 +62,12 @@ export class ThermostatAccessory {
     const operatingState =
       (findStateByName(attrs, 'operating_state') as string) ?? 'idle';
     const currentTemp = findStateByName(attrs, 'current_temp') as
-      | string
-      | number
-      | null;
+      string | number | null;
     const currentHumidity = findStateByName(attrs, 'current_humidity');
     const coolingSetpoint = findStateByName(attrs, 'cooling_setpoint') as
-      | string
-      | number
-      | null;
+      string | number | null;
     const heatingSetpoint = findStateByName(attrs, 'heating_setpoint') as
-      | string
-      | number
-      | null;
+      string | number | null;
     const fanMode =
       (findStateByName(attrs, 'fan_mode') as ThermostatFanMode) ?? 'auto';
 
