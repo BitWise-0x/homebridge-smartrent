@@ -45,15 +45,14 @@ vi.mock('jwt-decode', () => ({
 }));
 
 vi.mock('otplib', () => ({
-  authenticator: {
-    generate: vi.fn(() => '123456'),
-  },
+  generate: vi.fn(async () => '123456'),
+  createGuardrails: vi.fn(() => ({})),
 }));
 
 import { existsSync, promises as fsPromises } from 'fs';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
-import { authenticator } from 'otplib';
+import { generate } from 'otplib';
 import { SmartRentAuthClient } from '../auth.js';
 
 const mockLog = {
@@ -252,7 +251,9 @@ describe('SmartRentAuthClient', () => {
         tfaSecret: 'JBSWY3DPEHPK3PXP',
       });
 
-      expect(authenticator.generate).toHaveBeenCalledWith('JBSWY3DPEHPK3PXP');
+      expect(generate).toHaveBeenCalledWith(
+        expect.objectContaining({ secret: 'JBSWY3DPEHPK3PXP' })
+      );
       expect(token).toBe('final-token');
       expect(mockAxiosInstance.post).toHaveBeenCalledTimes(2);
     });

@@ -16,7 +16,7 @@ import {
   AUTH_CLIENT_HEADERS,
 } from './request.js';
 import { jwtDecode } from 'jwt-decode';
-import { authenticator } from 'otplib';
+import { createGuardrails, generate } from 'otplib';
 
 const USER_PREFIX = 'User:';
 /** Credentials stored in config.json */
@@ -275,7 +275,13 @@ export class SmartRentAuthClient {
         return;
       }
 
-      const token = authenticator.generate(tfaSecret);
+      // otplib 13 rejects secrets shorter than 16 bytes by default. otplib 12
+      // imposed no minimum and SmartRent secrets are whatever the account was
+      // provisioned with, so keep accepting the 80-bit secrets that already work.
+      const token = await generate({
+        secret: tfaSecret,
+        guardrails: createGuardrails({ MIN_SECRET_BYTES: 10 }),
+      });
 
       return this._startTfaSession({
         tfa_api_token: sessionData.tfa_api_token,

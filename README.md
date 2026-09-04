@@ -150,7 +150,7 @@ graph TD
 
 ### Prerequisites
 
-- Node.js 18.20.4+, 20.18.0+, 22.10.0+, or 24.0.0+
+- Node.js 20.19.0+, 22.10.0+, or 24.0.0+
 - Homebridge 1.8.0+ or 2.0.0-beta+
 
 ### Setup
