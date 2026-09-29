@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.0.0](https://github.com/BitWise-0x/homebridge-smartrent/compare/v2.0.0...v3.0.0) (2026-09-29)
+
+### ⚠ BREAKING CHANGES
+
+* requires Node.js 22.10.0+ or 24.0.0+. Node 20 is no longer supported.
+
+### Features
+
+* drop Node 20 support ([608cfa3](https://github.com/BitWise-0x/homebridge-smartrent/commit/608cfa3378884ae6f13131fa7ad948df2fd0617f))
+
 ## [2.0.0](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.4.3...v2.0.0) (2026-09-04)
 
 ### ⚠ BREAKING CHANGES
