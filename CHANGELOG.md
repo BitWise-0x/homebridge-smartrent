@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.0.2](https://github.com/BitWise-0x/homebridge-smartrent/compare/v3.0.1...v3.0.2) (2026-09-29)
+
+### Bug Fixes
+
+* **deps:** bump fast-uri from 4.1.3 to 4.2.1 ([758ed12](https://github.com/BitWise-0x/homebridge-smartrent/commit/758ed1259d606ca3cbf5b37a35082b864551012e))
+
 ## [3.0.1](https://github.com/BitWise-0x/homebridge-smartrent/compare/v3.0.0...v3.0.1) (2026-09-29)
 
 ### Bug Fixes
