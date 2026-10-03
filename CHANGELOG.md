@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.0.3](https://github.com/BitWise-0x/homebridge-smartrent/compare/v3.0.2...v3.0.3) (2026-10-03)
+
+### Bug Fixes
+
+* **deps:** bump undici from 7.29.0 to 7.30.0 ([c41d3cc](https://github.com/BitWise-0x/homebridge-smartrent/commit/c41d3cccbb7dd8250a8eae2ac9c5aef7274a903b))
+* **deps:** bump ws ([a348daf](https://github.com/BitWise-0x/homebridge-smartrent/commit/a348daf410bca874a96f0245c7e15cebd6553d3b))
+
 ## [3.0.2](https://github.com/BitWise-0x/homebridge-smartrent/compare/v3.0.1...v3.0.2) (2026-09-29)
 
 ### Bug Fixes
