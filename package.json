@@ -1,7 +1,7 @@
 {
   "displayName": "SmartRent",
   "name": "@jackietreeh0rn/homebridge-smartrent",
-  "version": "3.0.4",
+  "version": "3.0.5",
   "description": "Homebridge plugin for SmartRent installations",
   "keywords": [
     "homebridge",
