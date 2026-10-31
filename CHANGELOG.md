@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.0.7](https://github.com/BitWise-0x/homebridge-smartrent/compare/v3.0.6...v3.0.7) (2026-10-31)
+
+### Bug Fixes
+
+* **deps:** bump follow-redirects from 1.16.1 to 1.16.2 ([a5806a7](https://github.com/BitWise-0x/homebridge-smartrent/commit/a5806a71ceeeb7ffaadd02eb73890d418c1a61ae))
+
 ## [3.0.6](https://github.com/BitWise-0x/homebridge-smartrent/compare/v3.0.5...v3.0.6) (2026-10-31)
 
 ### Bug Fixes
