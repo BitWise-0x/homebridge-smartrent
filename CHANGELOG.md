@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.0.6](https://github.com/BitWise-0x/homebridge-smartrent/compare/v3.0.5...v3.0.6) (2026-10-31)
+
+### Bug Fixes
+
+* **deps:** bump axios ([aeb9841](https://github.com/BitWise-0x/homebridge-smartrent/commit/aeb9841c021b35a06a30f1acf84b9f2aac945328))
+
 ## [3.0.5](https://github.com/BitWise-0x/homebridge-smartrent/compare/v3.0.4...v3.0.5) (2026-10-29)
 
 ### Bug Fixes
