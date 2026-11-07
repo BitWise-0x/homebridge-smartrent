@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.0.8](https://github.com/BitWise-0x/homebridge-smartrent/compare/v3.0.7...v3.0.8) (2026-11-07)
+
+### Bug Fixes
+
+* **deps:** bump the production-dependencies group with 3 updates ([b3d3bcb](https://github.com/BitWise-0x/homebridge-smartrent/commit/b3d3bcb210d0d5d1641914448c860c3f4bb74618))
+
 ## [3.0.7](https://github.com/BitWise-0x/homebridge-smartrent/compare/v3.0.6...v3.0.7) (2026-10-31)
 
 ### Bug Fixes
