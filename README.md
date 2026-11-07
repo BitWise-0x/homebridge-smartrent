@@ -77,15 +77,15 @@ graph TD
 
 ## Features
 
-- **Real-time updates** — WebSocket connection with Phoenix heartbeat for instant state changes across all devices
-- **6 device types** — Locks, thermostats, leak sensors, motion sensors, switches, and dimmers
-- **Accurate HVAC status** — Uses the thermostat's actual operating state (heating/cooling/idle), not just the target mode
-- **Lock jam detection** — Detects and reports lock jams via SmartRent notification events
-- **Battery monitoring** — Battery level and low-battery alerts for locks and leak sensors
-- **Device online/offline status** — Reports device reachability for all device types
-- **Two-factor authentication** — Full TOTP support for secured SmartRent accounts
-- **Auto-lock** — Configurable timer to automatically re-lock after unlocking
-- **Per-device toggles** — Enable or disable any device type independently via config
+- **Real-time updates**: WebSocket connection with Phoenix heartbeat for instant state changes across all devices
+- **6 device types**: Locks, thermostats, leak sensors, motion sensors, switches, and dimmers
+- **Accurate HVAC status**: Uses the thermostat's actual operating state (heating/cooling/idle), not just the target mode
+- **Lock jam detection**: Detects and reports lock jams via SmartRent notification events
+- **Battery monitoring**: Battery level and low-battery alerts for locks and leak sensors
+- **Device online/offline status**: Reports device reachability for all device types
+- **Two-factor authentication**: Full TOTP support for secured SmartRent accounts
+- **Auto-lock**: Configurable timer to automatically re-lock after unlocking
+- **Per-device toggles**: Enable or disable any device type independently via config
 
 <br>
 
@@ -125,24 +125,24 @@ graph TD
 
 ## Configuration
 
-| Property                  | Type    | Default      | Description                                                                                          |
-| ------------------------- | ------- | ------------ | ---------------------------------------------------------------------------------------------------- |
-| `email`                   | string  | _required_   | SmartRent account email                                                                              |
-| `password`                | string  | _required_   | SmartRent account password                                                                           |
-| `tfaSecret`               | string  |              | 32-character TOTP seed for two-factor authentication                                                 |
-| `unitName`                | string  |              | Unit name — only needed if you have multiple units. Find it in the SmartRent app under the More tab. |
-| `enableLocks`             | boolean | `true`       | Enable lock accessories                                                                              |
-| `enableThermostats`       | boolean | `true`       | Enable thermostat accessories                                                                        |
-| `enableLeakSensors`       | boolean | `true`       | Enable leak sensor accessories                                                                       |
-| `enableMotionSensors`     | boolean | `true`       | Enable motion sensor accessories                                                                     |
-| `enableSwitches`          | boolean | `true`       | Enable switch accessories                                                                            |
-| `enableSwitchMultiLevels` | boolean | `true`       | Enable dimmer/multilevel switch accessories                                                          |
-| `enableAutoLock`          | boolean | `false`      | Automatically re-lock after unlocking                                                                |
-| `autoLockDelayInMinutes`  | integer | `5`          | Minutes to wait before auto-locking                                                                  |
-| `excludeDevices`          | array   |              | List of SmartRent device IDs to exclude from HomeKit. Device IDs are shown in logs at startup.       |
-| `lowBatteryThreshold`     | integer | `20`         | Battery percentage at or below which devices report low battery status (5–50)                        |
-| `temperatureUnit`         | string  | `fahrenheit` | Temperature display unit for thermostats (`fahrenheit` or `celsius`)                                 |
-| `verboseLogging`          | boolean | `false`      | Enable verbose debug logging for troubleshooting                                                     |
+| Property                  | Type    | Default      | Description                                                                                         |
+| ------------------------- | ------- | ------------ | --------------------------------------------------------------------------------------------------- |
+| `email`                   | string  | _required_   | SmartRent account email                                                                             |
+| `password`                | string  | _required_   | SmartRent account password                                                                          |
+| `tfaSecret`               | string  |              | 32-character TOTP seed for two-factor authentication                                                |
+| `unitName`                | string  |              | Unit name, only needed if you have multiple units. Find it in the SmartRent app under the More tab. |
+| `enableLocks`             | boolean | `true`       | Enable lock accessories                                                                             |
+| `enableThermostats`       | boolean | `true`       | Enable thermostat accessories                                                                       |
+| `enableLeakSensors`       | boolean | `true`       | Enable leak sensor accessories                                                                      |
+| `enableMotionSensors`     | boolean | `true`       | Enable motion sensor accessories                                                                    |
+| `enableSwitches`          | boolean | `true`       | Enable switch accessories                                                                           |
+| `enableSwitchMultiLevels` | boolean | `true`       | Enable dimmer/multilevel switch accessories                                                         |
+| `enableAutoLock`          | boolean | `false`      | Automatically re-lock after unlocking                                                               |
+| `autoLockDelayInMinutes`  | integer | `5`          | Minutes to wait before auto-locking                                                                 |
+| `excludeDevices`          | array   |              | List of SmartRent device IDs to exclude from HomeKit. Device IDs are shown in logs at startup.      |
+| `lowBatteryThreshold`     | integer | `20`         | Battery percentage at or below which devices report low battery status (5–50)                       |
+| `temperatureUnit`         | string  | `fahrenheit` | Temperature display unit for thermostats (`fahrenheit` or `celsius`)                                |
+| `verboseLogging`          | boolean | `false`      | Enable verbose debug logging for troubleshooting                                                    |
 
 <br>
 
@@ -180,7 +180,7 @@ npm run prettier    # check formatting
 npm run format      # auto-fix formatting
 ```
 
-Commits must follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/#summary) — enforced by pre-commit hooks via [commitlint](https://commitlint.js.org/) and [husky](https://typicode.github.io/husky/).
+Commits must follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/#summary), enforced by pre-commit hooks via [commitlint](https://commitlint.js.org/) and [husky](https://typicode.github.io/husky/).
 
 ### Dependency Updates
 
@@ -219,7 +219,7 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines on bug reports, feature 
 
 ## Useful Resources
 
-> **Read the full write-up:** [Homebridge SmartRent & Blink](https://blog.bitwise0x.com/blog/homebridge-smartrent-blink) — an architectural deep-dive into how both plugins map their respective APIs into HomeKit (HAP service composition, IMMI streaming, OAuth/2FA, motion polling).
+> **Read the full write-up:** [Homebridge SmartRent & Blink](https://blog.bitwise0x.com/blog/homebridge-smartrent-blink), an architectural deep-dive into how both plugins map their respective APIs into HomeKit (HAP service composition, IMMI streaming, OAuth/2FA, motion polling).
 
 - [Homebridge Developer Documentation](https://developers.homebridge.io/)
 - [Apple HomeKit Documentation](https://developer.apple.com/documentation/homekit/)
