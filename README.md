@@ -102,7 +102,7 @@ graph TD
 3. Log in to SmartRent through the settings panel, and optionally set your unit name.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/BitWise-0x/homebridge-smartrent/main/homebridge-ui/public/screenshot1.png" width="400" alt="Plugin settings screenshot" />
+  <img src="https://raw.githubusercontent.com/BitWise-0x/homebridge-smartrent/main/homebridge-ui/public/screenshot1.png?v=2" width="400" alt="Plugin settings screenshot" />
 </p>
 
 ### Manual
