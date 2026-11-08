@@ -26,7 +26,7 @@ The most comprehensive [SmartRent](https://smartrent.com) Homebridge integration
 
 <br><br>
 <p align="center">
-  <img src="https://raw.githubusercontent.com/BitWise-0x/homebridge-smartrent/main/homebridge-ui/public/homebridge-status.webp?v=3" width="900" alt="Homebridge status page with the HomeKit pairing code and SmartRent log lines streaming" />
+  <img src="https://raw.githubusercontent.com/BitWise-0x/homebridge-smartrent/main/homebridge-ui/public/homebridge-status.webp?v=4" width="900" alt="Homebridge status page with the HomeKit pairing code and SmartRent log lines streaming" />
 </p>
 
 <br>
@@ -48,7 +48,7 @@ The most comprehensive [SmartRent](https://smartrent.com) Homebridge integration
 
 All devices report online/offline status via the StatusActive characteristic.
 
-![Homebridge dashboard](homebridge-ui/public/screenshot2.png)
+![Homebridge dashboard](homebridge-ui/public/screenshot2.png?v=2)
 
 <br>
 
@@ -107,7 +107,7 @@ graph TD
 3. Log in to SmartRent through the settings panel, and optionally set your unit name.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/BitWise-0x/homebridge-smartrent/main/homebridge-ui/public/screenshot1.png?v=2" width="400" alt="Plugin settings screenshot" />
+  <img src="https://raw.githubusercontent.com/BitWise-0x/homebridge-smartrent/main/homebridge-ui/public/screenshot1.png?v=3" width="400" alt="Plugin settings screenshot" />
 </p>
 
 ### Manual
