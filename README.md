@@ -26,7 +26,7 @@ The most comprehensive [SmartRent](https://smartrent.com) Homebridge integration
 
 <br><br>
 <p align="center">
-  <img src="https://raw.githubusercontent.com/BitWise-0x/homebridge-smartrent/main/homebridge-ui/public/homebridge-status.webp?v=2" width="900" alt="Homebridge status page with the HomeKit pairing code and SmartRent log lines streaming" />
+  <img src="https://raw.githubusercontent.com/BitWise-0x/homebridge-smartrent/main/homebridge-ui/public/homebridge-status.webp?v=3" width="900" alt="Homebridge status page with the HomeKit pairing code and SmartRent log lines streaming" />
 </p>
 
 <br>
@@ -203,7 +203,7 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines on bug reports, feature 
 
 ## Useful Resources
 
-> **Read the full write-up:** [Homebridge SmartRent & Blink](https://blog.bitwise0x.com/blog/homebridge-smartrent-blink), an architectural deep-dive into how both plugins map their respective APIs into HomeKit (HAP service composition, IMMI streaming, OAuth/2FA, motion polling).
+> **Read the full write-up:** [Homebridge SmartRent & Blink](https://bitwise0x.com/blog/homebridge-smartrent-blink), an architectural deep-dive into how both plugins map their respective APIs into HomeKit (HAP service composition, IMMI streaming, OAuth/2FA, motion polling).
 
 - [Homebridge Developer Documentation](https://developers.homebridge.io/)
 - [Apple HomeKit Documentation](https://developer.apple.com/documentation/homekit/)
