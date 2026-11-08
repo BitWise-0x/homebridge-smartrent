@@ -79,6 +79,13 @@ export class LeakSensorAccessory {
     this.battery =
       this.accessory.getService(this.platform.api.hap.Service.Battery) ||
       this.accessory.addService(this.platform.api.hap.Service.Battery);
+    this.battery.addOptionalCharacteristic(
+      this.platform.api.hap.Characteristic.ConfiguredName
+    );
+    this.battery.setCharacteristic(
+      this.platform.api.hap.Characteristic.ConfiguredName,
+      `${accessory.context.device.name} Battery`
+    );
     this.battery
       .getCharacteristic(this.platform.api.hap.Characteristic.BatteryLevel)
       .onGet(this.handleBatteryLevelGet.bind(this));

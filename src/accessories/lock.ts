@@ -63,6 +63,13 @@ export class LockAccessory {
     this.battery =
       this.accessory.getService(this.platform.api.hap.Service.Battery) ||
       this.accessory.addService(this.platform.api.hap.Service.Battery);
+    this.battery.addOptionalCharacteristic(
+      this.platform.api.hap.Characteristic.ConfiguredName
+    );
+    this.battery.setCharacteristic(
+      this.platform.api.hap.Characteristic.ConfiguredName,
+      `${accessory.context.device.name} Battery`
+    );
     this.battery
       .getCharacteristic(this.platform.api.hap.Characteristic.BatteryLevel)
       .onGet(this.handleBatteryLevelGet.bind(this));
@@ -230,6 +237,19 @@ export class LockAccessory {
         error
       );
       throw error;
+    }
+  }
+
+  /**
+   * Cancel the pending auto-lock. Called when the accessory is removed from
+   * HomeKit: otherwise the timer still fires and locks a physical door the
+   * user has just removed, then writes to a detached service.
+   */
+  dispose(): void {
+    if (this.timer) {
+      clearTimeout(this.timer);
+      this.timer = undefined;
+      this.timerSet = false;
     }
   }
 

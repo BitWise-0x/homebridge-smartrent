@@ -3,6 +3,101 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.0.8](https://github.com/BitWise-0x/homebridge-smartrent/compare/v3.0.7...v3.0.8) (2026-11-07)
+
+### Bug Fixes
+
+* **deps:** bump the production-dependencies group with 3 updates ([b3d3bcb](https://github.com/BitWise-0x/homebridge-smartrent/commit/b3d3bcb210d0d5d1641914448c860c3f4bb74618))
+
+## [3.0.7](https://github.com/BitWise-0x/homebridge-smartrent/compare/v3.0.6...v3.0.7) (2026-10-31)
+
+### Bug Fixes
+
+* **deps:** bump follow-redirects from 1.16.1 to 1.16.2 ([a5806a7](https://github.com/BitWise-0x/homebridge-smartrent/commit/a5806a71ceeeb7ffaadd02eb73890d418c1a61ae))
+
+## [3.0.6](https://github.com/BitWise-0x/homebridge-smartrent/compare/v3.0.5...v3.0.6) (2026-10-31)
+
+### Bug Fixes
+
+* **deps:** bump axios ([aeb9841](https://github.com/BitWise-0x/homebridge-smartrent/commit/aeb9841c021b35a06a30f1acf84b9f2aac945328))
+
+## [3.0.5](https://github.com/BitWise-0x/homebridge-smartrent/compare/v3.0.4...v3.0.5) (2026-10-29)
+
+### Bug Fixes
+
+* **engines:** support Node.js 26 ([b6e92d3](https://github.com/BitWise-0x/homebridge-smartrent/commit/b6e92d34a11bff3dce1935d44acea9d0a3ce775d))
+
+## [3.0.4](https://github.com/BitWise-0x/homebridge-smartrent/compare/v3.0.3...v3.0.4) (2026-10-21)
+
+### Bug Fixes
+
+* **deps:** bump follow-redirects from 1.16.0 to 1.16.1 ([a4b0040](https://github.com/BitWise-0x/homebridge-smartrent/commit/a4b0040db9418d657b55b572d33c36ee2b89f100))
+
+## [3.0.3](https://github.com/BitWise-0x/homebridge-smartrent/compare/v3.0.2...v3.0.3) (2026-10-03)
+
+### Bug Fixes
+
+* **deps:** bump undici from 7.29.0 to 7.30.0 ([c41d3cc](https://github.com/BitWise-0x/homebridge-smartrent/commit/c41d3cccbb7dd8250a8eae2ac9c5aef7274a903b))
+* **deps:** bump ws ([a348daf](https://github.com/BitWise-0x/homebridge-smartrent/commit/a348daf410bca874a96f0245c7e15cebd6553d3b))
+
+## [3.0.2](https://github.com/BitWise-0x/homebridge-smartrent/compare/v3.0.1...v3.0.2) (2026-09-29)
+
+### Bug Fixes
+
+* **deps:** bump fast-uri from 4.1.3 to 4.2.1 ([758ed12](https://github.com/BitWise-0x/homebridge-smartrent/commit/758ed1259d606ca3cbf5b37a35082b864551012e))
+
+## [3.0.1](https://github.com/BitWise-0x/homebridge-smartrent/compare/v3.0.0...v3.0.1) (2026-09-29)
+
+### Bug Fixes
+
+* **deps:** bump the production-dependencies group across 1 directory with 2 updates ([7ea691f](https://github.com/BitWise-0x/homebridge-smartrent/commit/7ea691fc3c66d800701e0f0a104d41da050ffec7))
+
+## [3.0.0](https://github.com/BitWise-0x/homebridge-smartrent/compare/v2.0.0...v3.0.0) (2026-09-29)
+
+### ⚠ BREAKING CHANGES
+
+* requires Node.js 22.10.0+ or 24.0.0+. Node 20 is no longer supported.
+
+### Features
+
+* drop Node 20 support ([608cfa3](https://github.com/BitWise-0x/homebridge-smartrent/commit/608cfa3378884ae6f13131fa7ad948df2fd0617f))
+
+## [2.0.0](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.4.3...v2.0.0) (2026-09-04)
+
+### ⚠ BREAKING CHANGES
+
+* **auth:** Node.js 18 is no longer supported. Node.js 20.19.0 or
+newer is required.
+
+### Bug Fixes
+
+* **auth:** migrate to otplib 13 ([53a9835](https://github.com/BitWise-0x/homebridge-smartrent/commit/53a98354d94e9b30dc21ef9a4d0041e281f0bf89))
+* **release:** pin conventional-changelog preset to v9 ([76cae33](https://github.com/BitWise-0x/homebridge-smartrent/commit/76cae33dad1ea05343061fcc1e3bbf3870b26a07))
+
+## [1.4.3](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.4.2...v1.4.3) (2026-09-04)
+
+### Bug Fixes
+
+* **deps:** patch dev-scope advisories and unblock dependabot automation ([bdbbb4c](https://github.com/BitWise-0x/homebridge-smartrent/commit/bdbbb4cc9f9e090ace16b23d928ded279e1369f8))
+
+## [1.4.2](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.4.1...v1.4.2) (2026-07-23)
+
+### Bug Fixes
+
+* **platform:** rediscover devices periodically and harden token sanitization ([f6d2a56](https://github.com/BitWise-0x/homebridge-smartrent/commit/f6d2a56e057d1113f8ea7c763986326b61b541cd))
+
+## [1.4.1](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.4.0...v1.4.1) (2026-07-23)
+
+### Bug Fixes
+
+* **thermostat:** prevent unhandled rejection crashing child bridge on state fetch failure ([0e9d459](https://github.com/BitWise-0x/homebridge-smartrent/commit/0e9d45999adf7bd51a616409c08c2b5e4199cd75))
+
+## [1.4.0](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.3.10...v1.4.0) (2026-04-15)
+
+### Features
+
+* **accessories:** set ConfiguredName on secondary services for HomeKit pairing ([08ae579](https://github.com/BitWise-0x/homebridge-smartrent/commit/08ae5791809f30d8be0579354a3f290633a93ad5))
+
 ## [1.3.10](https://github.com/BitWise-0x/homebridge-smartrent/compare/v1.3.9...v1.3.10) (2026-04-08)
 
 ### Bug Fixes

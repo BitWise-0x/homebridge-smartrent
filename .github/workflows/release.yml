@@ -9,12 +9,43 @@ permissions:
   contents: write # for checkout
 
 concurrency:
+  # Never cancel a release in progress: semantic-release publishes to npm before
+  # it tags and commits the changelog, so an interrupted run can leave a
+  # published version with no matching tag.
   group: release-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
+  verify:
+    name: Verify
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22.x
+          # The npm cache lookup would run Node 22's npm 10, which devEngines
+          # rejects. See build.yml.
+          package-manager-cache: false
+      # package.json requires npm 11 through devEngines. See build.yml.
+      - name: Upgrade npm
+        run: npm install -g npm@11
+      - name: Install dependencies
+        run: npm clean-install
+      - name: Check formatting
+        run: npm run prettier
+      - name: Lint the project
+        run: npm run lint
+      - name: Run tests
+        run: npm test
+      - name: Build the project
+        run: npm run build
+
   release:
     name: Release
+    needs: verify
     runs-on: ubuntu-latest
     permissions:
       contents: write # to be able to publish a GitHub release
@@ -22,26 +53,36 @@ jobs:
       pull-requests: write # to be able to comment on released pull requests
       id-token: write # to enable use of OIDC for npm provenance
     steps:
+      # Short-lived token from the bitwise-ci App (on this repo's ruleset bypass),
+      # so semantic-release can push the changelog commit + tag to protected main
+      # and create the GitHub release. Replaces the former admin-owned GH_TOKEN PAT.
+      - name: Mint App token
+        id: apptoken
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.CI_APP_ID }}
+          private-key: ${{ secrets.CI_APP_PRIVATE_KEY }}
       - name: Checkout
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
           persist-credentials: false
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.apptoken.outputs.token }}
+          GH_TOKEN: ${{ steps.apptoken.outputs.token }}
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 'lts/*'
+          cache: npm
       - name: Install dependencies
         run: npm clean-install
       - name: Verify the integrity of provenance attestations and registry signatures for installed dependencies
         run: npm audit signatures
       - name: Release
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.apptoken.outputs.token }}
+          GH_TOKEN: ${{ steps.apptoken.outputs.token }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm run semantic-release

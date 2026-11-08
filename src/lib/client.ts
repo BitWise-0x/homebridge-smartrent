@@ -167,24 +167,178 @@ export class SmartRentApiClient {
   }
 
   /**
-   * Remove Authorization headers from an AxiosError to prevent token leakage
+   * Remove Authorization headers from an AxiosError to prevent token leakage.
+   *
+   * A timed-out request is a follow-redirects Writable, which keeps its own copy
+   * of the resolved options and nests the raw header string on _currentRequest.
+   * Node prints the whole object graph on an unhandled rejection, so every copy
+   * has to be scrubbed, not just the one on error.config.
    */
+  private static readonly MAX_SCRUB_DEPTH = 8;
+  private static readonly REDACTED = '[REDACTED]';
+  // Any bearer token, wherever it appears: header strings, urls, query
+  // strings. Matching on the value rather than the key name catches the
+  // places a token turns up under a name other than Authorization.
+  private static readonly BEARER_PATTERN =
+    /Bearer(?:%20|\s)+[A-Za-z0-9._~+/=-]+/gi;
+
+  /** Redact tokens inside a string, or return it unchanged. */
+  private static _redactString(value: string): string {
+    return value.replace(
+      SmartRentApiClient.BEARER_PATTERN,
+      `Bearer ${SmartRentApiClient.REDACTED}`
+    );
+  }
+
+  /**
+   * Best-effort write. Frozen and sealed objects throw on both delete and
+   * assignment in strict mode, and this runs outside any try/catch in the
+   * response interceptor — a throw here would replace the real network error
+   * with a confusing TypeError and break the retry classifier.
+   */
+  private static _tryWrite(
+    record: Record<PropertyKey, unknown>,
+    key: PropertyKey,
+    value: unknown
+  ): void {
+    try {
+      record[key] = value;
+    } catch {
+      // Non-writable target; the value stays but nothing else breaks.
+    }
+  }
+
   private static _sanitizeAxiosError(error: import('axios').AxiosError) {
-    if (error.config?.headers) {
-      delete (error.config.headers as Record<string, unknown>).Authorization;
-    }
-    if (error.response?.config?.headers) {
-      delete (error.response.config.headers as Record<string, unknown>)
-        .Authorization;
-    }
-    // Sanitize raw HTTP header string on the request object
-    const req = error.request as Record<string, unknown> | undefined;
-    if (req?._header && typeof req._header === 'string') {
-      req._header = req._header.replace(
-        /Authorization: Bearer [^\r\n]+/g,
-        'Authorization: Bearer [REDACTED]'
-      );
-    }
+    // Records the depth an object was last walked at. Re-walking is allowed
+    // when the object is reached again from a shallower root, otherwise a
+    // deep first visit would permanently cut off children that a shallower
+    // path could still have scrubbed.
+    const seenAtDepth = new Map<object, number>();
+
+    const scrub = (value: unknown, depth: number): void => {
+      if (
+        depth > SmartRentApiClient.MAX_SCRUB_DEPTH ||
+        value === null ||
+        typeof value !== 'object'
+      ) {
+        return;
+      }
+      const previous = seenAtDepth.get(value);
+      if (previous !== undefined && previous <= depth) {
+        return;
+      }
+      seenAtDepth.set(value, depth);
+
+      // Buffers are index-keyed byte arrays: walking them costs one entry per
+      // byte and yields nothing, but their contents can hold raw request
+      // bytes, so redact them wholesale instead.
+      if (Buffer.isBuffer(value)) {
+        const text = value.toString('latin1');
+        const redacted = SmartRentApiClient._redactString(text);
+        if (redacted !== text) {
+          value.write(redacted.padEnd(value.length, ' '), 0, 'latin1');
+        }
+        return;
+      }
+
+      if (value instanceof Map) {
+        for (const [key, entry] of value) {
+          if (typeof entry === 'string') {
+            const redacted = SmartRentApiClient._redactString(entry);
+            if (redacted !== entry) {
+              try {
+                value.set(key, redacted);
+              } catch {
+                // Frozen Map-likes; leave it.
+              }
+            }
+          } else {
+            scrub(entry, depth + 1);
+          }
+        }
+        return;
+      }
+
+      if (value instanceof Set) {
+        // Set members cannot be edited in place, so a offending string is
+        // swapped for its redacted form.
+        const replacements: [unknown, string][] = [];
+        for (const entry of value) {
+          if (typeof entry === 'string') {
+            const redacted = SmartRentApiClient._redactString(entry);
+            if (redacted !== entry) {
+              replacements.push([entry, redacted]);
+            }
+          } else {
+            scrub(entry, depth + 1);
+          }
+        }
+        for (const [original, redacted] of replacements) {
+          try {
+            value.delete(original);
+            value.add(redacted);
+          } catch {
+            // Frozen Set-likes; leave it.
+          }
+        }
+        return;
+      }
+
+      const record = value as Record<PropertyKey, unknown>;
+      // Symbol keys matter here: node stores the outgoing header map under
+      // Symbol(kOutHeaders), which Object.keys cannot see.
+      const keys: PropertyKey[] = [
+        ...Object.keys(record),
+        ...Object.getOwnPropertySymbols(record),
+      ];
+      for (const key of keys) {
+        let child: unknown;
+        try {
+          child = record[key];
+        } catch {
+          continue; // getters on the socket can throw
+        }
+        if (
+          typeof key === 'string' &&
+          key.toLowerCase() === 'authorization' &&
+          typeof child === 'string'
+        ) {
+          SmartRentApiClient._tryWrite(
+            record,
+            key,
+            SmartRentApiClient.REDACTED
+          );
+        } else if (typeof child === 'string') {
+          const redacted = SmartRentApiClient._redactString(child);
+          if (redacted !== child) {
+            SmartRentApiClient._tryWrite(record, key, redacted);
+          }
+        } else if (Array.isArray(child)) {
+          // kOutHeaders entries are [originalName, value] pairs
+          for (let i = 0; i < child.length; i++) {
+            if (typeof child[i] === 'string') {
+              const redacted = SmartRentApiClient._redactString(
+                child[i] as string
+              );
+              if (redacted !== child[i]) {
+                SmartRentApiClient._tryWrite(
+                  child as unknown as Record<PropertyKey, unknown>,
+                  i,
+                  redacted
+                );
+              }
+            }
+          }
+          scrub(child, depth + 1);
+        } else {
+          scrub(child, depth + 1);
+        }
+      }
+    };
+
+    scrub(error.config, 0);
+    scrub(error.response?.config, 0);
+    scrub(error.request, 0);
   }
 
   // API request methods

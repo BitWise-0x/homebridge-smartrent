@@ -127,15 +127,21 @@ export class SmartRentApi {
     const devices = await this.client.get<Array<DeviceDataUnion>>(
       `/hubs/${hubId}/devices`
     );
-    this.platform.log.info('Devices Found: ', devices);
+    this.platform.log.debug('Devices found: ', devices);
 
     if (devices.length) {
       this.platform.log.info(`Found ${devices.length} devices`);
     } else {
-      this.platform.log.error('No devices found');
+      this.platform.log.warn('No devices found');
     }
 
+    // Excluded devices are filtered before subscribing: subscribing one only
+    // to drop its events wastes a channel and re-joins it on every reconnect.
+    const excludeIds = new Set(this.platform.config.excludeDevices ?? []);
     for (const device of devices) {
+      if (excludeIds.has(device.id)) {
+        continue;
+      }
       this.platform.log.debug('device: ', device);
       await this.websocket.subscribeDevice(device.id);
     }

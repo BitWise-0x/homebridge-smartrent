@@ -2,7 +2,7 @@
 
 <h1>
   <a href="https://github.com/BitWise-0x/homebridge-smartrent">
-    <img align="center" src="homebridge-ui/public/banner.png" />
+    <img align="center" src="https://raw.githubusercontent.com/BitWise-0x/homebridge-smartrent/main/homebridge-ui/public/banner.png" />
   </a>
   <br />
   Homebridge SmartRent
@@ -77,15 +77,15 @@ graph TD
 
 ## Features
 
-- **Real-time updates** — WebSocket connection with Phoenix heartbeat for instant state changes across all devices
-- **6 device types** — Locks, thermostats, leak sensors, motion sensors, switches, and dimmers
-- **Accurate HVAC status** — Uses the thermostat's actual operating state (heating/cooling/idle), not just the target mode
-- **Lock jam detection** — Detects and reports lock jams via SmartRent notification events
-- **Battery monitoring** — Battery level and low-battery alerts for locks and leak sensors
-- **Device online/offline status** — Reports device reachability for all device types
-- **Two-factor authentication** — Full TOTP support for secured SmartRent accounts
-- **Auto-lock** — Configurable timer to automatically re-lock after unlocking
-- **Per-device toggles** — Enable or disable any device type independently via config
+- **Real-time updates**: WebSocket connection with Phoenix heartbeat for instant state changes across all devices
+- **6 device types**: Locks, thermostats, leak sensors, motion sensors, switches, and dimmers
+- **Accurate HVAC status**: Uses the thermostat's actual operating state (heating/cooling/idle), not just the target mode
+- **Lock jam detection**: Detects and reports lock jams via SmartRent notification events
+- **Battery monitoring**: Battery level and low-battery alerts for locks and leak sensors
+- **Device online/offline status**: Reports device reachability for all device types
+- **Two-factor authentication**: Full TOTP support for secured SmartRent accounts
+- **Auto-lock**: Configurable timer to automatically re-lock after unlocking
+- **Per-device toggles**: Enable or disable any device type independently via config
 
 <br>
 
@@ -102,7 +102,7 @@ graph TD
 3. Log in to SmartRent through the settings panel, and optionally set your unit name.
 
 <p align="center">
-  <img src="homebridge-ui/public/screenshot1.png" width="400" alt="Plugin settings screenshot" />
+  <img src="https://raw.githubusercontent.com/BitWise-0x/homebridge-smartrent/main/homebridge-ui/public/screenshot1.png" width="400" alt="Plugin settings screenshot" />
 </p>
 
 ### Manual
@@ -125,24 +125,24 @@ graph TD
 
 ## Configuration
 
-| Property                  | Type    | Default      | Description                                                                                          |
-| ------------------------- | ------- | ------------ | ---------------------------------------------------------------------------------------------------- |
-| `email`                   | string  | _required_   | SmartRent account email                                                                              |
-| `password`                | string  | _required_   | SmartRent account password                                                                           |
-| `tfaSecret`               | string  |              | 32-character TOTP seed for two-factor authentication                                                 |
-| `unitName`                | string  |              | Unit name — only needed if you have multiple units. Find it in the SmartRent app under the More tab. |
-| `enableLocks`             | boolean | `true`       | Enable lock accessories                                                                              |
-| `enableThermostats`       | boolean | `true`       | Enable thermostat accessories                                                                        |
-| `enableLeakSensors`       | boolean | `true`       | Enable leak sensor accessories                                                                       |
-| `enableMotionSensors`     | boolean | `true`       | Enable motion sensor accessories                                                                     |
-| `enableSwitches`          | boolean | `true`       | Enable switch accessories                                                                            |
-| `enableSwitchMultiLevels` | boolean | `true`       | Enable dimmer/multilevel switch accessories                                                          |
-| `enableAutoLock`          | boolean | `false`      | Automatically re-lock after unlocking                                                                |
-| `autoLockDelayInMinutes`  | integer | `5`          | Minutes to wait before auto-locking                                                                  |
-| `excludeDevices`          | array   |              | List of SmartRent device IDs to exclude from HomeKit. Device IDs are shown in logs at startup.       |
-| `lowBatteryThreshold`     | integer | `20`         | Battery percentage at or below which devices report low battery status (5–50)                        |
-| `temperatureUnit`         | string  | `fahrenheit` | Temperature display unit for thermostats (`fahrenheit` or `celsius`)                                 |
-| `verboseLogging`          | boolean | `false`      | Enable verbose debug logging for troubleshooting                                                     |
+| Property                  | Type    | Default      | Description                                                                                         |
+| ------------------------- | ------- | ------------ | --------------------------------------------------------------------------------------------------- |
+| `email`                   | string  | _required_   | SmartRent account email                                                                             |
+| `password`                | string  | _required_   | SmartRent account password                                                                          |
+| `tfaSecret`               | string  |              | 32-character TOTP seed for two-factor authentication                                                |
+| `unitName`                | string  |              | Unit name, only needed if you have multiple units. Find it in the SmartRent app under the More tab. |
+| `enableLocks`             | boolean | `true`       | Enable lock accessories                                                                             |
+| `enableThermostats`       | boolean | `true`       | Enable thermostat accessories                                                                       |
+| `enableLeakSensors`       | boolean | `true`       | Enable leak sensor accessories                                                                      |
+| `enableMotionSensors`     | boolean | `true`       | Enable motion sensor accessories                                                                    |
+| `enableSwitches`          | boolean | `true`       | Enable switch accessories                                                                           |
+| `enableSwitchMultiLevels` | boolean | `true`       | Enable dimmer/multilevel switch accessories                                                         |
+| `enableAutoLock`          | boolean | `false`      | Automatically re-lock after unlocking                                                               |
+| `autoLockDelayInMinutes`  | integer | `5`          | Minutes to wait before auto-locking                                                                 |
+| `excludeDevices`          | array   |              | List of SmartRent device IDs to exclude from HomeKit. Device IDs are shown in logs at startup.      |
+| `lowBatteryThreshold`     | integer | `20`         | Battery percentage at or below which devices report low battery status (5–50)                       |
+| `temperatureUnit`         | string  | `fahrenheit` | Temperature display unit for thermostats (`fahrenheit` or `celsius`)                                |
+| `verboseLogging`          | boolean | `false`      | Enable verbose debug logging for troubleshooting                                                    |
 
 <br>
 
@@ -150,7 +150,7 @@ graph TD
 
 ### Prerequisites
 
-- Node.js 18.20.4+, 20.18.0+, 22.10.0+, or 24.0.0+
+- Node.js 22.10.0+, 24.0.0+, or 26.0.0+
 - Homebridge 1.8.0+ or 2.0.0-beta+
 
 ### Setup
@@ -180,7 +180,30 @@ npm run prettier    # check formatting
 npm run format      # auto-fix formatting
 ```
 
-Commits must follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/#summary) — enforced by pre-commit hooks via [commitlint](https://commitlint.js.org/) and [husky](https://typicode.github.io/husky/).
+Commits must follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/#summary), enforced by pre-commit hooks via [commitlint](https://commitlint.js.org/) and [husky](https://typicode.github.io/husky/).
+
+### Dependency Updates
+
+Dependabot opens grouped pull requests against `beta` weekly, configured in [`.github/dependabot.yml`](./.github/dependabot.yml). Production and development dependencies are each split into a minor/patch group and a major group. The [Dependabot Auto Merge](./.github/workflows/dependabot-merge.yml) workflow enables auto-merge on patch and minor updates, so they land on their own once CI passes. Major updates stay open for manual review. Production updates are committed as `fix(deps)`, so merging one cuts a beta patch release; development updates are committed as `chore(deps-dev)` and do not release. Security updates are the exception: GitHub always opens them against `main`, and the Sync Beta workflow carries them back to `beta`. Auto-merge is enabled with a token minted per run from the `bitwise-ci` GitHub App rather than the workflow's own `GITHUB_TOKEN`: merges made with `GITHUB_TOKEN` do not trigger push workflows, so the merged commit would land without Build or Release running.
+
+`prettier` is excluded from the development group. A Prettier minor can change formatting output, which fails the formatting check and would hold up every other update in the group. It gets its own pull request and usually needs an `npm run format` commit before it merges.
+
+Dependabot only tracks direct dependencies. Advisories against transitive packages, including ones bundled inside another package's tarball (for example `npm`, pulled in by `@semantic-release/npm`), show up as alerts without a pull request. Resolve those by raising the matching floor in the `overrides` block of `package.json` and regenerating the lockfile:
+
+```sh
+npm install --package-lock-only
+npm audit --omit=dev
+```
+
+`npm audit --omit=dev` only covers production dependencies, so a clean result can coexist with open development-scope alerts. Check the repository's Dependabot alerts page for those.
+
+### Releases
+
+Work lands on `beta`. Every push to `beta` runs [semantic-release](https://semantic-release.gitbook.io/) with the `conventionalcommits` preset and publishes a prerelease under the `beta` npm tag. A release to `latest` is a pull request from `beta` into `main`, merged with a merge commit; the `main` ruleset rejects direct pushes and pull requests from any other branch (the Source Branch check). After each release, the Sync Beta workflow merges `main`'s changelog commit back into `beta`.
+
+On both branches, `feat` commits cut a minor release, `fix` and `perf` a patch, and a `BREAKING CHANGE` footer a major. Other types (`docs`, `chore`, `ci`, `build`, `style`, `refactor`, `test`) do not release. Each release updates `CHANGELOG.md`, tags the commit, publishes to npm, and creates a GitHub release.
+
+Publishing requires `NPM_TOKEN`, a valid npm automation token, plus the `CI_APP_ID` and `CI_APP_PRIVATE_KEY` secrets of the `bitwise-ci` GitHub App. The Release workflow mints a short-lived App token with contents and pull-requests write access that semantic-release uses to push the changelog commit and tag and to create the GitHub release; the App is a bypass actor on the `main` and `beta` rulesets, so that push and the Sync Beta push are allowed. The Dependabot auto-merge workflow mints its token the same way. If the Release workflow fails with `EINVALIDNPMTOKEN`, generate a new npm token, update the secret, and re-run the failed job. `EINVALIDGHTOKEN` points at the App: check that it is still installed on the repository and that `CI_APP_PRIVATE_KEY` matches a current key. A run that stops with "local branch main is behind the remote one" published nothing; it happens when another commit reaches `main` mid-run, and the next successful run picks up every unreleased commit.
 
 <br>
 
@@ -198,7 +221,7 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines on bug reports, feature 
 
 ## Useful Resources
 
-> **Read the full write-up:** [Homebridge SmartRent & Blink](https://blog.bitwisesolutions.co/blog/homebridge-smartrent-blink) — covers setup, configuration, and integration details for both plugins.
+> **Read the full write-up:** [Homebridge SmartRent & Blink](https://blog.bitwise0x.com/blog/homebridge-smartrent-blink), an architectural deep-dive into how both plugins map their respective APIs into HomeKit (HAP service composition, IMMI streaming, OAuth/2FA, motion polling).
 
 - [Homebridge Developer Documentation](https://developers.homebridge.io/)
 - [Apple HomeKit Documentation](https://developer.apple.com/documentation/homekit/)

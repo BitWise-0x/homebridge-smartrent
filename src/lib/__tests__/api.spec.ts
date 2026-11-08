@@ -87,6 +87,31 @@ describe('SmartRentApi', () => {
       expect(devices).toEqual([{ id: 100, name: 'Lock' }]);
     });
 
+    // Subscribing an excluded device wastes a websocket channel and re-joins
+    // it on every reconnect, with no handler to receive its events.
+    it('does not subscribe devices listed in excludeDevices', async () => {
+      platform.config.unitName = undefined;
+      (platform.config as Record<string, unknown>).excludeDevices = [101];
+      const api = new SmartRentApi(platform);
+
+      vi.spyOn(api.client, 'get')
+        .mockResolvedValueOnce({
+          records: [{ marketing_name: 'U', hub_id: 5 }],
+        })
+        .mockResolvedValueOnce([
+          { id: 100, name: 'Keep' },
+          { id: 101, name: 'Excluded' },
+        ]);
+      const subscribe = vi
+        .spyOn(api.websocket, 'subscribeDevice')
+        .mockResolvedValue(undefined);
+
+      await api.discoverDevices();
+
+      expect(subscribe).toHaveBeenCalledWith(100);
+      expect(subscribe).not.toHaveBeenCalledWith(101);
+    });
+
     it('uses first unit when no unitName configured', async () => {
       platform.config.unitName = undefined;
       const api = new SmartRentApi(platform);

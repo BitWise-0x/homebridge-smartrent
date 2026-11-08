@@ -26,6 +26,7 @@ All types of contributions are encouraged and valued. See the [Table of Contents
 - [Improving The Documentation](#improving-the-documentation)
 - [Styleguides](#styleguides)
 - [Commit Messages](#commit-messages)
+- [Dependencies](#dependencies)
 - [Join The Project Team](#join-the-project-team)
 
 ## Code of Conduct
@@ -145,6 +146,8 @@ Enhancement suggestions are tracked as [GitHub issues](https://github.com/BitWis
 
 See the Development Section in the [README.md](README.md) for information on setting up your development environment.
 
+Open pull requests against the `beta` branch. `main` only takes merges from `beta` when a release is cut.
+
 ### Improving The Documentation
 
 Please submit a PR with your changes to the documentation. The main documentation is located in the [README.md](README.md) file.
@@ -158,6 +161,10 @@ The code style is defined by [.prettierrc.json](.prettierrc.json) and [eslint.co
 ### Commit Messages
 
 Commits must follow the [Conventional Commits standard](https://www.conventionalcommits.org/en/v1.0.0/#summary). This will be enforced by the CI/CD pipeline as well as pre-commit hooks.
+
+### Dependencies
+
+Dependency bumps are handled by Dependabot, with auto-merge for patch and minor updates and manual review for majors. Before bumping a version by hand or editing the `overrides` block in `package.json`, read [Dependency Updates](README.md#dependency-updates) in the README.
 
 <!-- omit in toc -->
 
