@@ -24,6 +24,11 @@ The most comprehensive [SmartRent](https://smartrent.com) Homebridge integration
 
 </span>
 
+<br><br>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/BitWise-0x/homebridge-smartrent/main/homebridge-ui/public/homebridge-status.webp" width="900" alt="Homebridge status page with the HomeKit pairing code and SmartRent log lines streaming" />
+</p>
+
 <br>
 
 ## Supported Devices
