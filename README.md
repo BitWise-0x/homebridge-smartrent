@@ -58,12 +58,12 @@ All devices report online/offline status via the StatusActive characteristic.
 graph TD
     Home["🏠 Apple Home"]
 
-    subgraph Homebridge
+    subgraph hb["Homebridge"]
         platform["<b>SmartRentPlatform</b><br>DynamicPlatformPlugin"]
         accessories["<b>Accessories</b><br>Lock · Thermostat · Leak<br>Motion · Switch · Dimmer"]
     end
 
-    subgraph SmartRent Cloud
+    subgraph cloud["SmartRent Cloud"]
         rest["<b>REST API</b><br>control.smartrent.com/api/v3"]
         ws["<b>WebSocket</b><br>Phoenix protocol<br>real-time state updates"]
         auth["<b>OAuth + TOTP</b><br>authentication/sessions"]
@@ -76,6 +76,12 @@ graph TD
     platform -->|"email/password<br>+ optional 2FA"| auth
     auth --> rest
     auth --> ws
+    classDef default fill:#efb146,stroke:#a96a19,stroke-width:2px,color:#0c0f0e
+    classDef quiet fill:#1b221f,stroke:#2e3733,stroke-width:2px,color:#e7ece8
+    linkStyle default stroke:#efb146,stroke-width:2px
+    class Home,rest,ws,auth quiet
+    style hb fill:transparent,stroke:#a96a19,stroke-width:1px,stroke-dasharray:5 4,color:#a96a19
+    style cloud fill:transparent,stroke:#a96a19,stroke-width:1px,stroke-dasharray:5 4,color:#a96a19
 ```
 
 <br>
@@ -221,3 +227,11 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines on bug reports, feature 
 ## Disclaimer
 
 This project is not endorsed by, directly affiliated with, maintained, authorized, or sponsored by SmartRent Technologies, Inc or Apple Inc. All product and company names are the registered trademarks of their original owners. The use of any trade name or trademark is for identification and reference purposes only and does not imply any association with the trademark holder of their product brand.
+
+<br>
+
+---
+
+<p align="center">
+  <sub>A <a href="https://bitwise0x.com"><b>BitWise</b></a> product</sub>
+</p>
